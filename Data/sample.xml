@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DATAPACKET Version="2.0">
+    <METADATA>
+        <FIELDS>
+            <FIELD attrname="FOLDERS" fieldtype="nested">
+                <FIELDS>
+                    <FIELD attrname="FOLDER_ID" fieldtype="i4" />
+                    <FIELD attrname="PARENT_ID" fieldtype="i4" />
+                    <FIELD attrname="FOLDER_NAME" fieldtype="string.uni" WIDTH="510" />
+                    <FIELD attrname="FOLDER_TYPE" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="FOLDER_INFO" fieldtype="bin.hex" SUBTYPE="WideText" />
+                    <FIELD attrname="VERSION_NO" fieldtype="i4" />
+                </FIELDS>
+                <PARAMS />
+            </FIELD>
+            <FIELD attrname="SONGS" fieldtype="nested">
+                <FIELDS>
+                    <FIELD attrname="SONG_ID" fieldtype="i4" />
+                    <FIELD attrname="FOLDER_ID" fieldtype="i4" />
+                    <FIELD attrname="SONG_TITLE" fieldtype="string.uni" WIDTH="510" />
+                    <FIELD attrname="SONG_NUMBER" fieldtype="i4" />
+                    <FIELD attrname="SONG_COMMENTS" fieldtype="string.uni" WIDTH="510" />
+                    <FIELD attrname="WORDS_AUTHOR" fieldtype="string.uni" WIDTH="200" />
+                    <FIELD attrname="WORDS_PUBLIC_DOMAIN" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="WORDS_COPYRIGHT_INFO" fieldtype="bin.hex" SUBTYPE="WideText" />
+                    <FIELD attrname="WORDS_LICENSE_COVERED" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="WORDS_COPYRIGHT_CODE" fieldtype="i4" />
+                    <FIELD attrname="WORDS_PERMISSION_USE" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="WORDS_PERMISSION_INFO" fieldtype="bin.hex" SUBTYPE="WideText" />
+                    <FIELD attrname="MUSIC_AUTHOR" fieldtype="string.uni" WIDTH="200" />
+                    <FIELD attrname="MUSIC_PUBLIC_DOMAIN" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="MUSIC_COPYRIGHT_INFO" fieldtype="bin.hex" SUBTYPE="WideText" />
+                    <FIELD attrname="MUSIC_LICENSE_COVERED" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="MUSIC_COPYRIGHT_CODE" fieldtype="i4" />
+                    <FIELD attrname="MUSIC_PERMISSION_USE" fieldtype="string" WIDTH="1" />
+                    <FIELD attrname="MUSIC_PERMISSION_INFO" fieldtype="bin.hex" SUBTYPE="WideText" />
+                    <FIELD attrname="EXT_SONG_CODE" fieldtype="string" WIDTH="40" />
+                </FIELDS>
+                <PARAMS />
+            </FIELD>
+            <FIELD attrname="SONG_SECTIONS" fieldtype="nested">
+                <FIELDS>
+                    <FIELD attrname="SONG_ID" fieldtype="i4" />
+                    <FIELD attrname="SECTION_ID" fieldtype="i4" />
+                    <FIELD attrname="SECTION_NAME" fieldtype="string.uni" WIDTH="128" />
+                    <FIELD attrname="SECTION_TEXT" fieldtype="bin.hex" SUBTYPE="WideText" />
+                    <FIELD attrname="SECTION_COMMENTS" fieldtype="string.uni" WIDTH="510" />
+                </FIELDS>
+                <PARAMS />
+            </FIELD>
+            <FIELD attrname="SONG_SECTION_ORDER" fieldtype="nested">
+                <FIELDS>
+                    <FIELD attrname="SONG_ID" fieldtype="i4" />
+                    <FIELD attrname="ORDER" fieldtype="i4" />
+                    <FIELD attrname="SECTION_ID" fieldtype="i4" />
+                </FIELDS>
+                <PARAMS />
+            </FIELD>
+        </FIELDS>
+        <PARAMS />
+    </METADATA>
+    <ROWDATA>
+        <ROW>
+            <FOLDERS>
+                <ROWFOLDERS FOLDER_ID="1" FOLDER_NAME="Seventh-day Adventist Hymnal" FOLDER_TYPE="C"
+                    FOLDER_INFO="Version 2, released on 13 Feb 2017, by the South Pacific Division&#013;&#010;This edition is for use in Australia only&#013;&#010;&#013;&#010;- The printed edition of the Seventh-day Adventist Hymnal was first &#013;&#010;    published in 1985 by the Review and Herald Publishing Association&#013;&#010;- This digital edition is Copyright &#169; 2017 and published by the&#013;&#010;    Seventh-day Adventist Church (SPD) Limited&#013;&#010;- The above copyright covers the digital publication, not the words of each hymn&#013;&#010;- The lyrics for some hymns are in the public domain and not subject to copyright&#013;&#010;- The lyrics for the remaining hymns are subject to separate copyright&#013;&#010;- To be used be Seventh-day Adventist Church and affiliated entities only&#013;&#010;- Certain parts of the content can only be accessed by users that hold &#013;&#010;    a valid licence from Christian Copyright Licensing International (CCLI)&#013;&#010;- All hymns are listed in this file, but the lyrics are only included where the &#013;&#010;    copyright for those lyrics are either:&#013;&#010;     a) in the public domain; or&#013;&#010;     b) covered by CCLI&#013;&#010;- Hymns with lyrics that do not meet (a) or (b) above do not have their lyrics&#013;&#010;    included in this file&#013;&#010;- Hymns with lyrics covered by CCLI (as per (b) above) can only be accessed &#013;&#010;    after valid CCLI licence details have been provided&#013;&#010;"
+                    VERSION_NO="2" />
+                <ROWFOLDERS FOLDER_ID="3" FOLDER_NAME="Seventh-Day Adventist Hymnal" />
+            </FOLDERS>
+            <SONGS>
+                <ROWSONGS SONG_ID="1" FOLDER_ID="1" SONG_TITLE="Praise to the Lord" SONG_NUMBER="1"
+                    SONG_COMMENTS="" WORDS_AUTHOR="Joachim Neander, Catherine Winkworth"
+                    WORDS_PUBLIC_DOMAIN="Y" WORDS_LICENSE_COVERED="N" WORDS_COPYRIGHT_CODE="0"
+                    WORDS_PERMISSION_USE="N" MUSIC_AUTHOR="Wm. S. Bennett, Chorale Book for England"
+                    MUSIC_PUBLIC_DOMAIN="Y" MUSIC_LICENSE_COVERED="N" MUSIC_COPYRIGHT_CODE="0"
+                    MUSIC_PERMISSION_USE="N" EXT_SONG_CODE="{F79A26B4-A7AB-4A85-B224-612AFA957D36}" />
+                <ROWSONGS SONG_ID="2" FOLDER_ID="1" SONG_TITLE="All Creatures of Our God and King"
+                    SONG_NUMBER="2" SONG_COMMENTS=""
+                    WORDS_AUTHOR="St. Francis of Assisi, William Henry Draper"
+                    WORDS_PUBLIC_DOMAIN="Y" WORDS_LICENSE_COVERED="N" WORDS_COPYRIGHT_CODE="0"
+                    WORDS_PERMISSION_USE="N"
+                    MUSIC_AUTHOR="arr. by Ralph Vaughan Williams (Lasst Uns Erfreuen)"
+                    MUSIC_PUBLIC_DOMAIN="N"
+                    MUSIC_COPYRIGHT_INFO="Oxford University Press&#013;&#010;"
+                    MUSIC_LICENSE_COVERED="Y" MUSIC_COPYRIGHT_CODE="2420288"
+                    MUSIC_PERMISSION_USE="N" EXT_SONG_CODE="{749817C0-078C-40BD-8095-343E60B7636F}" />
+                <ROWSONGS SONG_ID="3" FOLDER_ID="1" SONG_TITLE="God Himself Is With Us"
+                    SONG_NUMBER="3" SONG_COMMENTS="" WORDS_AUTHOR="Gerhard Tersteegen"
+                    WORDS_PUBLIC_DOMAIN="N" WORDS_LICENSE_COVERED="N" WORDS_COPYRIGHT_CODE="0"
+                    WORDS_PERMISSION_USE="N" MUSIC_AUTHOR="Joachim Neander" MUSIC_PUBLIC_DOMAIN="Y"
+                    MUSIC_LICENSE_COVERED="N" MUSIC_COPYRIGHT_CODE="0" MUSIC_PERMISSION_USE="N"
+                    EXT_SONG_CODE="{87D5C257-FDC3-4BE5-BC9D-26D0ED445839}" />
+                <ROWSONGS SONG_ID="4" FOLDER_ID="1" SONG_TITLE="Praise My Soul, the King of Heaven"
+                    SONG_NUMBER="4" SONG_COMMENTS="" WORDS_AUTHOR="Henry Francis Lyte"
+                    WORDS_PUBLIC_DOMAIN="Y" WORDS_LICENSE_COVERED="N" WORDS_COPYRIGHT_CODE="0"
+                    WORDS_PERMISSION_USE="N" MUSIC_AUTHOR="John Goss" MUSIC_PUBLIC_DOMAIN="Y"
+                    MUSIC_LICENSE_COVERED="N" MUSIC_COPYRIGHT_CODE="0" MUSIC_PERMISSION_USE="N"
+                    EXT_SONG_CODE="{6CF0D946-9A55-4CC0-932C-AC3D63E5E999}" />
+            </SONGS>
+            <SONG_SECTIONS>
+                <ROWSONG_SECTIONS SONG_ID="1" SECTION_ID="1" SECTION_NAME="Verse 1"
+                    SECTION_TEXT="Praise to the Lord, the Almighty, the King of creation!&#013;&#010;O my soul, praise Him, for He is thy health and salvation!&#013;&#010;All ye who hear,&#013;&#010;Now to His temple draw near;&#013;&#010;Join ye in glad adoration!&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="1" SECTION_ID="2" SECTION_NAME="Verse 2"
+                    SECTION_TEXT="Praise to the Lord, who o&apos;er all things so wondrously reigneth,&#013;&#010;Shieldeth thee under His wings, yea, so gently sustaineth!&#013;&#010;Hast thou not seen&#013;&#010;How thy desires e&apos;er have been&#013;&#010;Granted in what He ordaineth?&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="1" SECTION_ID="3" SECTION_NAME="Verse 3"
+                    SECTION_TEXT="Praise to the Lord, who doth prosper thy work and defend thee;&#013;&#010;Surely His goodness and mercy here daily attend thee.&#013;&#010;Ponder anew&#013;&#010;What the Almighty can do&#013;&#010;If with His love He befriend thee.&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="2" SECTION_ID="1" SECTION_NAME="Verse 1"
+                    SECTION_TEXT="All creatures of our God and King,&#013;&#010;Lift up your voice with us and sing:&#013;&#010;Alleluia! Alleluia!&#013;&#010;O burning sun with golden beam&#013;&#010;And silver moon with softer gleam:&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="2" SECTION_ID="2" SECTION_NAME="Refrain"
+                    SECTION_TEXT="Oh, praise Him! Oh, praise Him!&#013;&#010;Alleluia, alleluia, alleluia!&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="2" SECTION_ID="3" SECTION_NAME="Verse 2"
+                    SECTION_TEXT="O rushing wind and breezes soft,&#013;&#010;O clouds that ride the winds aloft:&#013;&#010;Oh, praise Him! Alleluia!&#013;&#010;O rising morn, in praise rejoice,&#013;&#010;O lights of evening, find a voice.&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="2" SECTION_ID="4" SECTION_NAME="Verse 3"
+                    SECTION_TEXT="O flowing waters, pure and clear,&#013;&#010;Make music for your Lord to hear.&#013;&#010;Oh, praise Him! Alleluia!&#013;&#010;O fire so masterful and bright,&#013;&#010;Providing us with warmth and light,&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="2" SECTION_ID="5" SECTION_NAME="Verse 4"
+                    SECTION_TEXT="Let all things their Creator bless,&#013;&#010;And worship Him in humbleness,&#013;&#010;Oh, praise Him! Alleluia!&#013;&#010;Oh, praise the Father, praise the Son,&#013;&#010;And praise the Spirit, three in One!&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="4" SECTION_ID="1" SECTION_NAME="Verse 1"
+                    SECTION_TEXT="Praise, my soul, the King of heaven;&#013;&#010;To His feet thy tribute bring;&#013;&#010;Ransomed, healed, restored, forgiven,&#013;&#010;Who like thee His praise should sing?&#013;&#010;Praise Him, praise Him, alleluia,&#013;&#010;Praise the everlasting King.&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="4" SECTION_ID="2" SECTION_NAME="Verse 2"
+                    SECTION_TEXT="Praise Him for His grace and favor&#013;&#010;To our fathers in distress;&#013;&#010;Praise Him still the same forever,&#013;&#010;Slow to chide and swift to bless;&#013;&#010;Praise Him, praise Him, alleluia&#013;&#010;Glorious in His faithfulness.&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="4" SECTION_ID="3" SECTION_NAME="Verse 3"
+                    SECTION_TEXT="Tenderly He shields and spares us;&#013;&#010;Well our feeble frame He knows;&#013;&#010;In His hands He gently bears us,&#013;&#010;Rescues us from all our foes:&#013;&#010;Praise Him, praise Him, alleluia,&#013;&#010;Widely as His mercy flows.&#013;&#010;"
+                    SECTION_COMMENTS="" />
+                <ROWSONG_SECTIONS SONG_ID="4" SECTION_ID="4" SECTION_NAME="Verse 4"
+                    SECTION_TEXT="Angels, help us to adore Him:&#013;&#010;Ye behold Him face to face;&#013;&#010;Sun and moon bow down before Him:&#013;&#010;Dwellers all in time and space,&#013;&#010;Praise Him, praise Him, alleluia,&#013;&#010;Praise with us the God of grace.&#013;&#010;"
+                    SECTION_COMMENTS="" />
+            </SONG_SECTIONS>
+            <SONG_SECTION_ORDER>
+                <ROWSONG_SECTION_ORDER SONG_ID="1" ORDER="0" SECTION_ID="1" />
+                <ROWSONG_SECTION_ORDER SONG_ID="1" ORDER="1" SECTION_ID="2" />
+                <ROWSONG_SECTION_ORDER SONG_ID="1" ORDER="2" SECTION_ID="3" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="0" SECTION_ID="1" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="1" SECTION_ID="2" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="2" SECTION_ID="3" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="3" SECTION_ID="2" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="4" SECTION_ID="4" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="5" SECTION_ID="2" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="6" SECTION_ID="5" />
+                <ROWSONG_SECTION_ORDER SONG_ID="2" ORDER="7" SECTION_ID="2" />
+                <ROWSONG_SECTION_ORDER SONG_ID="4" ORDER="0" SECTION_ID="1" />
+                <ROWSONG_SECTION_ORDER SONG_ID="4" ORDER="1" SECTION_ID="2" />
+                <ROWSONG_SECTION_ORDER SONG_ID="4" ORDER="2" SECTION_ID="3" />
+                <ROWSONG_SECTION_ORDER SONG_ID="4" ORDER="3" SECTION_ID="4" />
+            </SONG_SECTION_ORDER>
+        </ROW>
+    </ROWDATA>
+</DATAPACKET>

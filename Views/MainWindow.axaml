@@ -3,11 +3,11 @@
         xmlns:vm="using:GetHymnLyricsv2.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="GetHymnLyricsv2.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="GetHymnLyricsv2">
+        Title="Hymn Editor">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -15,6 +15,93 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid RowDefinitions="Auto,*">
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <Button Command="{Binding OpenFileCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Content="Open File" 
+                    Margin="0,0,10,0"/>
+            <Button Command="{Binding SaveFileCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Content="Save File"/>
+        </StackPanel>
 
+        <!-- Main Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="300,*">
+            <!-- Song List -->
+            <ListBox Grid.Column="0" 
+                     ItemsSource="{Binding Songs}"
+                     SelectedItem="{Binding SelectedSong}"
+                     Margin="10">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Number, StringFormat='#{0}'}" 
+                                     FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Title}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Song Details and Sections -->
+            <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="10">
+                <!-- Song Details -->
+                <StackPanel Grid.Row="0" IsVisible="{Binding SelectedSong, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Title:" Margin="0,0,10,5"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedSong.Title}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Number:" Margin="0,0,10,5"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedSong.Number}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Words Author:" Margin="0,0,10,5"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedSong.WordsAuthor}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Words Public Domain:" Margin="0,0,10,5"/>
+                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding SelectedSong.WordsPublicDomain}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Words License Covered:" Margin="0,0,10,5"/>
+                        <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding SelectedSong.WordsLicenseCovered}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Music Author:" Margin="0,0,10,5"/>
+                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SelectedSong.MusicAuthor}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Music Public Domain:" Margin="0,0,10,5"/>
+                        <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding SelectedSong.MusicPublicDomain}" Margin="0,0,0,5"/>
+                        
+                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Music License Covered:" Margin="0,0,10,5"/>
+                        <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding SelectedSong.MusicLicenseCovered}" Margin="0,0,0,5"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Song Sections -->
+                <ScrollViewer Grid.Row="1" Margin="0,10,0,0">
+                    <ItemsControl ItemsSource="{Binding CurrentSongSections}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,10">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBox Grid.Column="0" 
+                                                Text="{Binding SectionName}"
+                                                FontWeight="Bold"
+                                                Margin="0,0,10,5"/>
+                                        <TextBox Grid.Column="1"
+                                                Text="{Binding SectionComments}"
+                                                Watermark="Comments"
+                                                Width="200"/>
+                                    </Grid>
+                                    <TextBox Text="{Binding SectionText}"
+                                            AcceptsReturn="True"
+                                            TextWrapping="Wrap"
+                                            Height="100"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
 </Window>
