@@ -77,30 +77,65 @@
                 </StackPanel>
 
                 <!-- Song Sections -->
-                <ScrollViewer Grid.Row="1" Margin="0,10,0,0">
-                    <ItemsControl ItemsSource="{Binding CurrentSongSections}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,0,0,10">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBox Grid.Column="0" 
-                                                Text="{Binding SectionName}"
-                                                FontWeight="Bold"
-                                                Margin="0,0,10,5"/>
-                                        <TextBox Grid.Column="1"
-                                                Text="{Binding SectionComments}"
-                                                Watermark="Comments"
-                                                Width="200"/>
-                                    </Grid>
-                                    <TextBox Text="{Binding SectionText}"
-                                            AcceptsReturn="True"
-                                            TextWrapping="Wrap"
-                                            Height="100"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                <Grid Grid.Row="1" RowDefinitions="Auto,*" Margin="0,10,0,0">
+                    <!-- Add Section Button -->
+                    <Button Grid.Row="0" 
+                            Command="{Binding AddSectionCommand}"
+                            Content="Add Section"
+                            HorizontalAlignment="Left"
+                            Margin="0,0,0,10"/>
+                    
+                    <ScrollViewer Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding CurrentSongSections}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,20">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                            <!-- Section Controls -->
+                                            <StackPanel Grid.Column="0" 
+                                                      Orientation="Vertical" 
+                                                      Margin="0,0,10,0">
+                                                <Button Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).MoveSectionUpCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="↑"
+                                                        Width="30"
+                                                        Height="30"
+                                                        Margin="0,0,0,5"/>
+                                                <Button Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).MoveSectionDownCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Content="↓"
+                                                        Width="30"
+                                                        Height="30"/>
+                                            </StackPanel>
+
+                                            <TextBox Grid.Column="1" 
+                                                    Text="{Binding SectionName}"
+                                                    FontWeight="Bold"
+                                                    Margin="0,0,10,5"/>
+                                            <TextBox Grid.Column="2"
+                                                    Text="{Binding SectionComments}"
+                                                    Watermark="Comments"
+                                                    Width="200"
+                                                    Margin="0,0,10,0"/>
+                                            
+                                            <Button Grid.Column="3"
+                                                    Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).RemoveSectionCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="×"
+                                                    Width="30"
+                                                    Height="30"/>
+                                        </Grid>
+                                        <TextBox Text="{Binding SectionText}"
+                                                AcceptsReturn="True"
+                                                TextWrapping="Wrap"
+                                                Height="100"
+                                                Margin="40,5,0,0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
