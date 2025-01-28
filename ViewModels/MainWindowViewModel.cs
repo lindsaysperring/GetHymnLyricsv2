@@ -1,8 +1,9 @@
-﻿﻿using System;
+﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -106,8 +107,14 @@ namespace GetHymnLyricsv2.ViewModels
         {
             try
             {
+                var settings = new XmlReaderSettings
+                {
+                    IgnoreWhitespace = false
+                };
+
                 var serializer = new XmlSerializer(typeof(DataPacket));
-                using var reader = new StreamReader(filePath);
+                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                using var reader = XmlReader.Create(fileStream, settings);
                 DataPacket = (DataPacket)serializer.Deserialize(reader)!;
                 currentFilePath = filePath;
 
@@ -134,7 +141,15 @@ namespace GetHymnLyricsv2.ViewModels
                 if (DataPacket == null) return;
 
                 var serializer = new XmlSerializer(typeof(DataPacket));
-                using var writer = new StreamWriter(filePath);
+                var settings = new System.Xml.XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "  ",
+                    NewLineChars = Environment.NewLine,
+                    NewLineHandling = System.Xml.NewLineHandling.Replace
+                };
+
+                using var writer = System.Xml.XmlWriter.Create(filePath, settings);
                 serializer.Serialize(writer, DataPacket);
             }
             catch (Exception ex)

@@ -3,11 +3,56 @@ using System.Xml.Serialization;
 
 namespace GetHymnLyricsv2.Models
 {
+    public class Field
+    {
+        [XmlAttribute("attrname")]
+        public string AttrName { get; set; } = string.Empty;
+
+        [XmlAttribute("fieldtype")]
+        public string FieldType { get; set; } = string.Empty;
+
+        [XmlAttribute("WIDTH")]
+        public string? Width { get; set; }
+
+        [XmlAttribute("SUBTYPE")]
+        public string? SubType { get; set; }
+
+        [XmlElement("FIELDS")]
+        public Fields? Fields { get; set; }
+
+        [XmlElement("PARAMS")]
+        public Params? Params { get; set; }
+    }
+
+    public class Fields
+    {
+        [XmlElement("FIELD")]
+        public List<Field> Items { get; set; } = new();
+    }
+
+    public class Params
+    {
+    }
+
+    public class Metadata
+    {
+        [XmlElement("FIELDS")]
+        public Fields Fields { get; set; } = new();
+
+        [XmlElement("PARAMS")]
+        public Params Params { get; set; } = new();
+    }
+
     [XmlRoot("DATAPACKET")]
     public class DataPacket
     {
         public DataPacket()
         {
+            Metadata = new Metadata
+            {
+                Fields = new Fields { Items = new List<Field>() },
+                Params = new Params()
+            };
             RowData = new RowData
             {
                 Row = new Row
@@ -22,6 +67,9 @@ namespace GetHymnLyricsv2.Models
 
         [XmlAttribute("Version")]
         public string Version { get; set; } = "2.0";
+
+        [XmlElement("METADATA")]
+        public required Metadata Metadata { get; set; }
 
         [XmlElement("ROWDATA")]
         public required RowData RowData { get; set; }
