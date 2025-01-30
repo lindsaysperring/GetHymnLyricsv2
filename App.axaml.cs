@@ -1,19 +1,36 @@
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using GetHymnLyricsv2.ViewModels;
 using GetHymnLyricsv2.Views;
+using GetHymnLyricsv2.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GetHymnLyricsv2
 {
     public partial class App : Application
     {
+        private ServiceProvider? _serviceProvider;
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+
+            var services = new ServiceCollection();
+
+            // Register services
+            services.AddSingleton<IFileService, FileService>();
+            services.AddSingleton<ISongService, SongService>();
+            services.AddSingleton<IDialogService, DialogService>();
+
+            // Register view models
+            services.AddTransient<SongDetailsViewModel>();
+            services.AddTransient<SongSectionsViewModel>();
+            services.AddTransient<MainWindowViewModel>();
+
+            _serviceProvider = services.BuildServiceProvider();
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -23,9 +40,11 @@ namespace GetHymnLyricsv2
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
+
+                var mainViewModel = _serviceProvider?.GetRequiredService<MainWindowViewModel>();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = mainViewModel,
                 };
             }
 
