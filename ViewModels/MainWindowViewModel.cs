@@ -1,6 +1,8 @@
 ﻿﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,7 +26,21 @@ namespace GetHymnLyricsv2.ViewModels
         private ObservableCollection<Song> songs = new();
 
         [ObservableProperty]
+        private string searchText = string.Empty;
+
+        [ObservableProperty]
         private Song? selectedSong;
+
+        public IEnumerable<Song> FilteredSongs => string.IsNullOrWhiteSpace(SearchText) 
+            ? Songs 
+            : Songs.Where(s => 
+                (s.Title?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) || 
+                s.Number.ToString().Contains(SearchText));
+
+        partial void OnSearchTextChanged(string value)
+        {
+            OnPropertyChanged(nameof(FilteredSongs));
+        }
 
         public SongDetailsViewModel SongDetails { get; }
         public SongSectionsViewModel SongSections { get; }
