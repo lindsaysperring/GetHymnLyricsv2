@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace GetHymnLyricsv2.Models
 {
@@ -126,28 +127,35 @@ namespace GetHymnLyricsv2.Models
         public required List<Song> Items { get; set; }
     }
 
-    public class Song
+    public partial class Song : ObservableObject
     {
-        [XmlAttribute("SONG_ID")]
-        public int SongId { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("SONG_ID")]
+        private int songId;
 
-        [XmlAttribute("FOLDER_ID")]
-        public int FolderId { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("FOLDER_ID")]
+        private int folderId;
 
-        [XmlAttribute("SONG_TITLE")]
-        public string Title { get; set; } = string.Empty;
+        [ObservableProperty]
+        [property: XmlAttribute("SONG_TITLE")]
+        private string title = string.Empty;
 
-        [XmlAttribute("SONG_NUMBER")]
-        public int Number { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("SONG_NUMBER")]
+        private int number;
 
-        [XmlAttribute("SONG_COMMENTS")]
-        public string Comments { get; set; } = string.Empty;
+        [ObservableProperty]
+        [property: XmlAttribute("SONG_COMMENTS")]
+        private string comments = string.Empty;
 
-        [XmlAttribute("WORDS_AUTHOR")]
-        public string WordsAuthor { get; set; } = string.Empty;
+        [ObservableProperty]
+        [property: XmlAttribute("WORDS_AUTHOR")]
+        private string wordsAuthor = string.Empty;
 
-        [XmlIgnore]
-        public bool WordsPublicDomain { get; set; }
+        [ObservableProperty]
+        [property: XmlIgnore]
+        private bool wordsPublicDomain;
 
         [XmlAttribute("WORDS_PUBLIC_DOMAIN")]
         public string WordsPublicDomainString
@@ -156,11 +164,13 @@ namespace GetHymnLyricsv2.Models
             set => WordsPublicDomain = value == "Y";
         }
 
-        [XmlAttribute("WORDS_COPYRIGHT_INFO")]
-        public string WordsCopyrightInfo { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("WORDS_COPYRIGHT_INFO")]
+        private string wordsCopyrightInfo = string.Empty;
 
-        [XmlIgnore]
-        public bool WordsLicenseCovered { get; set; }
+        [ObservableProperty]
+        [property: XmlIgnore]
+        private bool wordsLicenseCovered;
 
         [XmlAttribute("WORDS_LICENSE_COVERED")]
         public string WordsLicenseCoveredString
@@ -169,14 +179,17 @@ namespace GetHymnLyricsv2.Models
             set => WordsLicenseCovered = value == "Y";
         }
 
-        [XmlAttribute("WORDS_COPYRIGHT_CODE")]
-        public int WordsCopyrightCode { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("WORDS_COPYRIGHT_CODE")]
+        private int wordsCopyrightCode;
 
-        [XmlAttribute("MUSIC_AUTHOR")]
-        public string MusicAuthor { get; set; } = string.Empty;
+        [ObservableProperty]
+        [property: XmlAttribute("MUSIC_AUTHOR")]
+        private string musicAuthor = string.Empty;
 
-        [XmlIgnore]
-        public bool MusicPublicDomain { get; set; }
+        [ObservableProperty]
+        [property: XmlIgnore]
+        private bool musicPublicDomain;
 
         [XmlAttribute("MUSIC_PUBLIC_DOMAIN")]
         public string MusicPublicDomainString
@@ -185,11 +198,13 @@ namespace GetHymnLyricsv2.Models
             set => MusicPublicDomain = value == "Y";
         }
 
-        [XmlAttribute("MUSIC_COPYRIGHT_INFO")]
-        public string MusicCopyrightInfo { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("MUSIC_COPYRIGHT_INFO")]
+        private string musicCopyrightInfo = string.Empty;
 
-        [XmlIgnore]
-        public bool MusicLicenseCovered { get; set; }
+        [ObservableProperty]
+        [property: XmlIgnore]
+        private bool musicLicenseCovered;
 
         [XmlAttribute("MUSIC_LICENSE_COVERED")]
         public string MusicLicenseCoveredString
@@ -198,11 +213,13 @@ namespace GetHymnLyricsv2.Models
             set => MusicLicenseCovered = value == "Y";
         }
 
-        [XmlAttribute("MUSIC_COPYRIGHT_CODE")]
-        public int MusicCopyrightCode { get; set; }
+        [ObservableProperty]
+        [property: XmlAttribute("MUSIC_COPYRIGHT_CODE")]
+        private int musicCopyrightCode;
 
-        [XmlAttribute("EXT_SONG_CODE")]
-        public string ExtSongCode { get; set; } = string.Empty;
+        [ObservableProperty]
+        [property: XmlAttribute("EXT_SONG_CODE")]
+        private string extSongCode = string.Empty;
     }
 
     public class SongSections
