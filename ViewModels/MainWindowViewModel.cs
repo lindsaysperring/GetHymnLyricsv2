@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿using System;
+﻿﻿﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -28,10 +28,19 @@ namespace GetHymnLyricsv2.ViewModels
         private ObservableCollection<SongSection> currentSongSections = new();
 
         [ObservableProperty]
+        private ObservableCollection<OrderItem> songOrder = new();
+
+        [ObservableProperty]
         private SongSection? selectedSection;
 
         [ObservableProperty]
         private int nextSectionId;
+
+        public class OrderItem
+        {
+            public required SongSection Section { get; init; }
+            public required SectionOrder OrderEntry { get; init; }
+        }
 
         private string? currentFilePath;
 
@@ -103,48 +112,110 @@ namespace GetHymnLyricsv2.ViewModels
         }
 
         [RelayCommand]
-        private void MoveSectionUp(SongSection section)
+        private void AddToOrder()
+        {
+            if (SelectedSong == null || SelectedSection == null || 
+                DataPacket?.RowData?.Row?.SongSectionOrder?.Items == null) return;
+
+            // Get the next order number
+            var maxOrder = DataPacket.RowData.Row.SongSectionOrder.Items
+                .Where(o => o.SongId == SelectedSong.SongId)
+                .DefaultIfEmpty()
+                .Max(o => o?.Order ?? -1) + 1;
+
+            // Create new order entry
+            var newOrder = new SectionOrder
+            {
+                SongId = SelectedSong.SongId,
+                SectionId = SelectedSection.SectionId,
+                Order = maxOrder
+            };
+
+            DataPacket.RowData.Row.SongSectionOrder.Items.Add(newOrder);
+            UpdateSongOrder();
+        }
+
+        [RelayCommand]
+        private void MoveOrderUp(OrderItem orderItem)
         {
             if (DataPacket?.RowData?.Row?.SongSectionOrder?.Items == null || SelectedSong == null) return;
 
-            var currentOrder = DataPacket.RowData.Row.SongSectionOrder.Items
-                .FirstOrDefault(o => o.SongId == section.SongId && o.SectionId == section.SectionId);
-
-            if (currentOrder == null) return;
-
             var previousOrder = DataPacket.RowData.Row.SongSectionOrder.Items
-                .Where(o => o.SongId == section.SongId && o.Order < currentOrder.Order)
+                .Where(o => o.SongId == orderItem.OrderEntry.SongId && o.Order < orderItem.OrderEntry.Order)
                 .OrderByDescending(o => o.Order)
                 .FirstOrDefault();
 
             if (previousOrder != null)
             {
                 // Swap orders
-                (currentOrder.Order, previousOrder.Order) = (previousOrder.Order, currentOrder.Order);
-                OnSelectedSongChanged(SelectedSong);
+                (orderItem.OrderEntry.Order, previousOrder.Order) = (previousOrder.Order, orderItem.OrderEntry.Order);
+                UpdateSongOrder();
             }
         }
 
         [RelayCommand]
-        private void MoveSectionDown(SongSection section)
+        private void MoveOrderDown(OrderItem orderItem)
         {
             if (DataPacket?.RowData?.Row?.SongSectionOrder?.Items == null || SelectedSong == null) return;
 
-            var currentOrder = DataPacket.RowData.Row.SongSectionOrder.Items
-                .FirstOrDefault(o => o.SongId == section.SongId && o.SectionId == section.SectionId);
-
-            if (currentOrder == null) return;
-
             var nextOrder = DataPacket.RowData.Row.SongSectionOrder.Items
-                .Where(o => o.SongId == section.SongId && o.Order > currentOrder.Order)
+                .Where(o => o.SongId == orderItem.OrderEntry.SongId && o.Order > orderItem.OrderEntry.Order)
                 .OrderBy(o => o.Order)
                 .FirstOrDefault();
 
             if (nextOrder != null)
             {
                 // Swap orders
-                (currentOrder.Order, nextOrder.Order) = (nextOrder.Order, currentOrder.Order);
-                OnSelectedSongChanged(SelectedSong);
+                (orderItem.OrderEntry.Order, nextOrder.Order) = (nextOrder.Order, orderItem.OrderEntry.Order);
+                UpdateSongOrder();
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveFromOrder(OrderItem orderItem)
+        {
+            if (DataPacket?.RowData?.Row?.SongSectionOrder?.Items == null) return;
+
+            // Remove the order entry
+            DataPacket.RowData.Row.SongSectionOrder.Items.Remove(orderItem.OrderEntry);
+
+            // Reorder remaining entries
+            var remainingOrders = DataPacket.RowData.Row.SongSectionOrder.Items
+                .Where(o => o.SongId == orderItem.OrderEntry.SongId)
+                .OrderBy(o => o.Order)
+                .ToList();
+
+            for (int i = 0; i < remainingOrders.Count; i++)
+            {
+                remainingOrders[i].Order = i;
+            }
+
+            UpdateSongOrder();
+        }
+
+        private void UpdateSongOrder()
+        {
+            if (SelectedSong == null || DataPacket?.RowData?.Row?.SongSections?.Items == null) return;
+
+            var orders = DataPacket.RowData.Row.SongSectionOrder.Items
+                .Where(o => o.SongId == SelectedSong.SongId)
+                .OrderBy(o => o.Order)
+                .ToList();
+
+            SongOrder.Clear();
+            foreach (var order in orders)
+            {
+                var section = DataPacket.RowData.Row.SongSections.Items
+                    .FirstOrDefault(s => s.SongId == order.SongId && s.SectionId == order.SectionId);
+                
+                if (section != null)
+                {
+                    SongOrder.Add(new OrderItem
+                    {
+                        Section = section,
+                        OrderEntry = order
+                    });
+                }
             }
         }
 
@@ -280,10 +351,9 @@ namespace GetHymnLyricsv2.ViewModels
         {
             if (value != null && DataPacket?.RowData?.Row?.SongSections?.Items != null)
             {
+                // Load sections
                 var sections = DataPacket.RowData.Row.SongSections.Items
                     .Where(s => s.SongId == value.SongId)
-                    .OrderBy(s => DataPacket.RowData.Row.SongSectionOrder.Items
-                        .FirstOrDefault(o => o.SongId == value.SongId && o.SectionId == s.SectionId)?.Order ?? 0)
                     .ToList();
 
                 CurrentSongSections.Clear();
@@ -291,10 +361,14 @@ namespace GetHymnLyricsv2.ViewModels
                 {
                     CurrentSongSections.Add(section);
                 }
+
+                // Load order
+                UpdateSongOrder();
             }
             else
             {
                 CurrentSongSections.Clear();
+                SongOrder.Clear();
             }
         }
     }
