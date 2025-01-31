@@ -7,12 +7,16 @@ using GetHymnLyricsv2.ViewModels;
 using GetHymnLyricsv2.Views;
 using GetHymnLyricsv2.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System;
 
 namespace GetHymnLyricsv2
 {
     public partial class App : Application
     {
         private ServiceProvider? _serviceProvider;
+        
+        public static readonly IReadOnlyList<SectionType> SectionTypes = Array.AsReadOnly(Enum.GetValues<SectionType>());
 
         public override void Initialize()
         {

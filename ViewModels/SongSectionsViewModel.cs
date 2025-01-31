@@ -1,12 +1,92 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
 using GetHymnLyricsv2.Services;
-
+using System;
 namespace GetHymnLyricsv2.ViewModels
 {
+    public enum SectionType
+    {
+        Verse,
+        Refrain
+    }
+    
+    public class SectionViewModel : INotifyPropertyChanged
+    {
+        private SongSection _section;
+        internal SectionType _sectionType;
+        private readonly SongSectionsViewModel _parent;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public SectionViewModel(SongSection section, SongSectionsViewModel parent)
+        {
+            _section = section;
+            _parent = parent;
+            _sectionType = section.SectionName.StartsWith("Verse", StringComparison.OrdinalIgnoreCase) 
+                ? SectionType.Verse 
+                : SectionType.Refrain;
+        }
+
+        public string SectionName
+        {
+            get => _section.SectionName;
+            set
+            {
+                if (_section.SectionName != value)
+                {
+                    _section.SectionName = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionName)));
+                }
+            }
+        }
+
+        public string SectionText
+        {
+            get => _section.SectionText;
+            set
+            {
+                if (_section.SectionText != value)
+                {
+                    _section.SectionText = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionText)));
+                }
+            }
+        }
+
+        public string SectionComments
+        {
+            get => _section.SectionComments;
+            set
+            {
+                if (_section.SectionComments != value)
+                {
+                    _section.SectionComments = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionComments)));
+                }
+            }
+        }
+
+        public SectionType SectionType
+        {
+            get => _sectionType;
+            set
+            {
+                if (_sectionType != value)
+                {
+                    _sectionType = value;
+                    _parent.UpdateSectionName(this);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionType)));
+                }
+            }
+        }
+
+        public SongSection Section => _section;
+    }
+
     public partial class SongSectionsViewModel : ViewModelBase
     {
         private readonly ISongService _songService;
@@ -14,10 +94,10 @@ namespace GetHymnLyricsv2.ViewModels
         private Song? _currentSong;
 
         [ObservableProperty]
-        private ObservableCollection<SongSection> sections = new();
+        private ObservableCollection<SectionViewModel> sections = new();
 
         [ObservableProperty]
-        private SongSection? selectedSection;
+        private SectionViewModel? selectedSection;
 
         [ObservableProperty]
         private ObservableCollection<MainWindowViewModel.OrderItem> songOrder = new();
@@ -42,8 +122,9 @@ namespace GetHymnLyricsv2.ViewModels
             Sections.Clear();
             foreach (var section in _songService.GetSongSections(_dataPacket, _currentSong.SongId))
             {
-                Sections.Add(section);
+                Sections.Add(new SectionViewModel(section, this));
             }
+            UpdateAllSectionNames();
         }
 
         private void UpdateOrder()
@@ -73,15 +154,47 @@ namespace GetHymnLyricsv2.ViewModels
         private void AddSection()
         {
             if (_dataPacket == null || _currentSong == null) return;
-            _songService.AddSection(_dataPacket, _currentSong, "New Section");
+            _songService.AddSection(_dataPacket, _currentSong, "Verse 1");
             UpdateSections();
         }
 
+        public void UpdateSectionName(SectionViewModel section)
+        {
+            if (section.SectionType == SectionType.Verse)
+            {
+                var currentVerseNumber = 1;
+                foreach (var s in Sections.Where(s => s.SectionType == SectionType.Verse).OrderBy(s => s.Section.SectionId))
+                {
+                    s.SectionName = $"Verse {currentVerseNumber}";
+                    currentVerseNumber++;
+                }
+            }
+            else // Refrain
+            {
+                section.SectionName = "Refrain";
+            }
+        }
+
+        private void UpdateAllSectionNames()
+        {
+            var currentVerseNumber = 1;
+            foreach (var section in Sections.Where(s => s.SectionType == SectionType.Verse).OrderBy(s => s.Section.SectionId))
+            {
+                section.SectionName = $"Verse {currentVerseNumber}";
+                currentVerseNumber++;
+            }
+
+            foreach (var section in Sections.Where(s => s.SectionType == SectionType.Refrain))
+            {
+                section.SectionName = "Refrain";
+            }
+        }
+
         [RelayCommand]
-        private void RemoveSection(SongSection section)
+        private void RemoveSection(SectionViewModel section)
         {
             if (_dataPacket == null) return;
-            _songService.RemoveSection(_dataPacket, section);
+            _songService.RemoveSection(_dataPacket, section.Section);
             UpdateSections();
             UpdateOrder();
         }
@@ -90,7 +203,7 @@ namespace GetHymnLyricsv2.ViewModels
         private void AddToOrder()
         {
             if (_dataPacket == null || _currentSong == null || SelectedSection == null) return;
-            _songService.AddToOrder(_dataPacket, _currentSong, SelectedSection);
+            _songService.AddToOrder(_dataPacket, _currentSong, SelectedSection.Section);
             UpdateOrder();
         }
 
