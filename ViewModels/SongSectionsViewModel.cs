@@ -190,6 +190,70 @@ namespace GetHymnLyricsv2.ViewModels
             }
         }
 
+        private void SwapSectionIds(SongSection section1, SongSection section2)
+        {
+            if (_dataPacket == null) return;
+
+            // Store original section IDs
+            var id1 = section1.SectionId;
+            var id2 = section2.SectionId;
+
+            // Get all order entries for both sections
+            var orders1 = _dataPacket.RowData.Row.SongSectionOrder.Items
+                .Where(o => o.SongId == section1.SongId && o.SectionId == id1)
+                .ToList();
+            var orders2 = _dataPacket.RowData.Row.SongSectionOrder.Items
+                .Where(o => o.SongId == section2.SongId && o.SectionId == id2)
+                .ToList();
+
+            // Only update order entries if both sections are verses
+            if (Sections.First(s => s.Section == section1).SectionType == SectionType.Verse &&
+                Sections.First(s => s.Section == section2).SectionType == SectionType.Verse)
+            {
+                // Update all order entries for section1 to use section2's ID
+                foreach (var order in orders1)
+                {
+                    order.SectionId = id2;
+                }
+
+                // Update all order entries for section2 to use section1's ID
+                foreach (var order in orders2)
+                {
+                    order.SectionId = id1;
+                }
+            }
+
+            // Swap section IDs
+            section1.SectionId = id2;
+            section2.SectionId = id1;
+        }
+
+        [RelayCommand]
+        private void MoveSectionUp(SectionViewModel section)
+        {
+            var index = Sections.IndexOf(section);
+            if (index > 0)
+            {
+                var previousSection = Sections[index - 1];
+                SwapSectionIds(section.Section, previousSection.Section);
+                Sections.Move(index, index - 1);
+                UpdateAllSectionNames();
+            }
+        }
+
+        [RelayCommand]
+        private void MoveSectionDown(SectionViewModel section)
+        {
+            var index = Sections.IndexOf(section);
+            if (index < Sections.Count - 1)
+            {
+                var nextSection = Sections[index + 1];
+                SwapSectionIds(section.Section, nextSection.Section);
+                Sections.Move(index, index + 1);
+                UpdateAllSectionNames();
+            }
+        }
+
         [RelayCommand]
         private void RemoveSection(SectionViewModel section)
         {
