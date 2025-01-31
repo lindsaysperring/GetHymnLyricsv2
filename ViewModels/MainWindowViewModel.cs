@@ -114,6 +114,44 @@ namespace GetHymnLyricsv2.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void AddSong()
+        {
+            if (DataPacket?.RowData?.Row?.Songs == null) return;
+
+            var maxNumber = Songs.Count > 0 ? Songs.Max(s => s.Number) : 0;
+            var newSong = new Song
+            {
+                Number = maxNumber + 1,
+                Title = "New Song",
+                WordsPublicDomain = false,
+                WordsLicenseCovered = false,
+                MusicPublicDomain = false,
+                MusicLicenseCovered = false
+            };
+
+            // Add to the DataPacket
+            DataPacket.RowData.Row.Songs.Items ??= new List<Song>();
+            DataPacket.RowData.Row.Songs.Items.Add(newSong);
+
+            // Add to the observable collection
+            Songs.Add(newSong);
+            SelectedSong = newSong;
+        }
+
+        [RelayCommand]
+        private void DeleteSong()
+        {
+            if (SelectedSong == null || DataPacket?.RowData?.Row?.Songs?.Items == null) return;
+
+            // Remove from the DataPacket
+            DataPacket.RowData.Row.Songs.Items.Remove(SelectedSong);
+
+            // Remove from the observable collection
+            Songs.Remove(SelectedSong);
+            SelectedSong = null;
+        }
+
         private async Task LoadFileAsync(string filePath)
         {
             try
