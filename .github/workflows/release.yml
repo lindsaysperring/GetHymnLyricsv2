@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            output_name: GetHymnLyricsv2.exe
+            artifact_name: GetHymnLyricsv2-Windows-x64
+            publish_rid: win-x64
+          - os: windows-latest
+            output_name: GetHymnLyricsv2.exe
+            artifact_name: GetHymnLyricsv2-Windows-x86
+            publish_rid: win-x86
+          - os: macos-latest
+            output_name: GetHymnLyricsv2
+            artifact_name: GetHymnLyricsv2-macOS
+            publish_rid: osx-x64
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Publish (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          dotnet publish -c Release -r ${{ matrix.publish_rid }} `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:EnableCompressionInSingleFile=true
+
+      - name: Publish (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          dotnet publish -c Release -r ${{ matrix.publish_rid }} \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          -p:EnableCompressionInSingleFile=true \
+          -p:IncludeAllContentForSelfExtract=true
+
+      - name: Create output directory
+        run: mkdir release-package
+
+      - name: Copy files (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          copy "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" "release-package\"
+
+      - name: Copy files (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          chmod +x "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
+          cp "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}" "release-package/"
+          mkdir "release-package/Data"
+          cp "Data/Songs.xml" "release-package/Data"
+          
+      - name: Create DMG (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          hdiutil create -volname "GetHymnLyricsv2" -srcfolder "release-package" -ov -format UDZO "GetHymnLyricsv2.dmg"
+          mv "GetHymnLyricsv2.dmg" "release-package/"
+          rm "release-package/${{ matrix.output_name }}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: release-package/
+
+  create-release:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            GetHymnLyricsv2-Windows-x64/*
+            GetHymnLyricsv2-Windows-x86/*
+            GetHymnLyricsv2-macOS/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
