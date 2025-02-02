@@ -49,10 +49,7 @@ jobs:
         run: |
           dotnet publish -c Release -r ${{ matrix.publish_rid }} \
           --self-contained true \
-          -p:PublishSingleFile=true \
-          -p:IncludeNativeLibrariesForSelfExtract=true \
-          -p:EnableCompressionInSingleFile=true \
-          -p:IncludeAllContentForSelfExtract=true
+          -p:UseAppHost=true
 
       - name: Create output directory
         run: mkdir release-package
@@ -62,20 +59,67 @@ jobs:
         run: |
           powershell Compress-Archive -Path "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
 
-      - name: Copy files (macOS)
+      - name: Create App Bundle (macOS)
         if: matrix.os == 'macos-latest'
         run: |
+          APP_NAME="GetHymnLyricsv2.app"
+          echo "app_name=$APP_NAME" >> "$GITHUB_ENV"
+          APP_CONTENTS="release-package/$APP_NAME/Contents"
+          
+          # Create app bundle structure
+          mkdir -p "$APP_CONTENTS/MacOS"
+          mkdir -p "$APP_CONTENTS/Resources"
+          
+          # Copy executable and make it executable
           chmod +x "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
-          cp "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}" "release-package/"
-          mkdir "release-package/Data"
-          cp "Data/Songs.xml" "release-package/Data"
+          cp -r "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/" "$APP_CONTENTS/MacOS/"
+          
+          # Copy data files
+          mkdir -p "$APP_CONTENTS/Resources/Data"
+          cp "Data/Songs.xml" "$APP_CONTENTS/Resources/Data/"
+          
+          # Copy icon if it exists
+          cp "Assets/gethymnlyrics-logo.ico" "$APP_CONTENTS/Resources/gethymnlyrics.icns" || true
+          
+          # Create Info.plist
+          cat > "$APP_CONTENTS/Info.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleExecutable</key>
+              <string>GetHymnLyricsv2</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.lindsaysperring.gethymnlyricsv2</string>
+              <key>CFBundleName</key>
+              <string>GetHymnLyricsv2</string>
+              <key>CFBundleIconFile</key>
+              <string>gethymnlyrics.icns</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>10.12</string>
+              <key>CFBundleInfoDictionaryVersion</key>
+              <string>6.0</string>
+              <key>CFBundleSupportedPlatforms</key>
+              <array>
+                  <string>MacOSX</string>
+              </array>
+          </dict>
+          </plist>
+          EOF
           
       - name: Create DMG (macOS)
         if: matrix.os == 'macos-latest'
         run: |
+          # Create DMG from the .app bundle
           hdiutil create -volname "GetHymnLyricsv2" -srcfolder "release-package" -ov -format UDZO "GetHymnLyricsv2.dmg"
           mv "GetHymnLyricsv2.dmg" "release-package/"
-          rm "release-package/${{ matrix.output_name }}"
+          rm -r "release-package/$app_name"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
