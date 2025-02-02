@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:local="clr-namespace:GetHymnLyricsv2"
+        xmlns:views="clr-namespace:GetHymnLyricsv2.Views"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="GetHymnLyricsv2.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -61,170 +62,11 @@
             </Grid>
 
             <!-- Song Details and Sections -->
-            <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="10">
-                <!-- Song Details -->
-                <StackPanel Grid.Row="0" IsVisible="{Binding SongDetails.Song, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Title:" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SongDetails.Song.Title}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Number:" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SongDetails.Song.Number}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Words Author:" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SongDetails.Song.WordsAuthor}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Words Public Domain:" Margin="0,0,10,5"/>
-                        <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding SongDetails.Song.WordsPublicDomain}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Words License Covered:" Margin="0,0,10,5"/>
-                        <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding SongDetails.Song.WordsLicenseCovered}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Music Author:" Margin="0,0,10,5"/>
-                        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SongDetails.Song.MusicAuthor}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Music Public Domain:" Margin="0,0,10,5"/>
-                        <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding SongDetails.Song.MusicPublicDomain}" Margin="0,0,0,5"/>
-                        
-                        <TextBlock Grid.Row="7" Grid.Column="0" Text="Music License Covered:" Margin="0,0,10,5"/>
-                        <CheckBox Grid.Row="7" Grid.Column="1" IsChecked="{Binding SongDetails.Song.MusicLicenseCovered}" Margin="0,0,0,5"/>
-                    </Grid>
-                </StackPanel>
-
-                <!-- Song Sections and Order -->
-                <Grid Grid.Row="1" RowDefinitions="Auto,*" ColumnDefinitions="*,*" Margin="0,10,0,0" IsVisible="{Binding SongDetails.Song, Converter={x:Static ObjectConverters.IsNotNull}}">
-                    <!-- Sections -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" 
-                            Text="Sections" 
-                            FontWeight="Bold" 
-                            Margin="0,0,0,10"/>
-                    
-                    <Grid Grid.Row="1" Grid.Column="0" RowDefinitions="Auto,*">
-                        <Button Grid.Row="0" 
-                                Command="{Binding SongSections.AddSectionCommand}"
-                                Content="Add Section"
-                                HorizontalAlignment="Left"
-                                Margin="0,0,0,10"/>
-                        
-                        <ScrollViewer Grid.Row="1">
-                            <ItemsControl ItemsSource="{Binding SongSections.Sections}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Margin="0,0,10,20">
-                                            <Grid ColumnDefinitions="*,Auto,Auto">
-                                                <Grid Grid.Column="0" ColumnDefinitions="Auto,Auto,Auto,*" Margin="0,0,10,5">
-                                                    <Button Grid.Column="0"
-                                                            Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SongSections.MoveSectionUpCommand}"
-                                                            CommandParameter="{Binding}"
-                                                            Content="↑"
-                                                            Width="30"
-                                                            Height="30"
-                                                            Margin="0,0,5,0"/>
-                                                    <Button Grid.Column="1"
-                                                            Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SongSections.MoveSectionDownCommand}"
-                                                            CommandParameter="{Binding}"
-                                                            Content="↓"
-                                                            Width="30"
-                                                            Height="30"
-                                                            Margin="0,0,10,0"/>
-                                                    <ComboBox Grid.Column="2"
-                                                            Name="SectionTypeCombo"
-                                                            SelectedItem="{Binding SectionType}"
-                                                            ItemsSource="{Binding Source={x:Static local:App.SectionTypes}}"
-                                                            Width="100"
-                                                            Margin="0,0,10,0"/>
-                                                    <TextBlock Grid.Column="3"
-                                                             Text="{Binding SectionName}"
-                                                             FontWeight="Bold"
-                                                             VerticalAlignment="Center"/>
-                                                </Grid>
-                                                <TextBox Grid.Column="1"
-                                                        Text="{Binding SectionComments}"
-                                                        Watermark="Comments"
-                                                        Width="200"
-                                                        Margin="0,0,10,0"/>
-
-                                                <Button Grid.Column="2"
-                                                        Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SongSections.RemoveSectionCommand}"
-                                                        CommandParameter="{Binding}"
-                                                        Content="×"
-                                                        Width="30"
-                                                        Height="30"/>
-                                            </Grid>
-                                            <TextBox Text="{Binding SectionText}"
-                                                    AcceptsReturn="True"
-                                                    TextWrapping="Wrap"
-                                                    Height="100"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-
-                    <!-- Order -->
-                    <TextBlock Grid.Row="0" Grid.Column="1" 
-                            Text="Song Order" 
-                            FontWeight="Bold" 
-                            Margin="10,0,0,10"/>
-                    
-                    <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="Auto,*" Margin="10,0,0,0">
-                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-                            <ComboBox Grid.Column="0"
-                                    ItemsSource="{Binding SongSections.Sections}"
-                                    SelectedItem="{Binding SongSections.SelectedSection}"
-                                    HorizontalAlignment="Stretch"
-                                    Margin="0,0,10,0">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding SectionName}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <Button Grid.Column="1"
-                                    Command="{Binding SongSections.AddToOrderCommand}"
-                                    Content="Add to Order"/>
-                        </Grid>
-
-                        <ScrollViewer Grid.Row="1">
-                            <ItemsControl ItemsSource="{Binding SongSections.SongOrder}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
-                                            <StackPanel Grid.Column="0" 
-                                                    Orientation="Vertical" 
-                                                    Margin="0,0,10,0">
-                                                <Button Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SongSections.MoveOrderUpCommand}"
-                                                        CommandParameter="{Binding}"
-                                                        Content="↑"
-                                                        Width="30"
-                                                        Height="30"
-                                                        Margin="0,0,0,5"/>
-                                                <Button Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SongSections.MoveOrderDownCommand}"
-                                                        CommandParameter="{Binding}"
-                                                        Content="↓"
-                                                        Width="30"
-                                                        Height="30"/>
-                                            </StackPanel>
-
-                                            <TextBlock Grid.Column="1" 
-                                                    Text="{Binding Section.SectionName}"
-                                                    VerticalAlignment="Center"/>
-                                            
-                                            <Button Grid.Column="2"
-                                                    Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).SongSections.RemoveFromOrderCommand}"
-                                                    CommandParameter="{Binding}"
-                                                    Content="×"
-                                                    Width="30"
-                                                    Height="30"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </Grid>
-            </Grid>
+            <TabControl Grid.Column="1" IsVisible="{Binding SelectedSong, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
+                <TabItem Header="Editor">
+                    <views:EditorView DataContext="{Binding}"/>
+                </TabItem>
+            </TabControl>
         </Grid>
     </Grid>
 </Window>
