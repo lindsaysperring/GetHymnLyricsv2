@@ -60,7 +60,7 @@ jobs:
       - name: Copy files (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          copy "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" "release-package\"
+          powershell Compress-Archive -Path "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
 
       - name: Copy files (macOS)
         if: matrix.os == 'macos-latest'

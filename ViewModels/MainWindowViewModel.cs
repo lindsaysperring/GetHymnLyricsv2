@@ -82,7 +82,7 @@ namespace GetHymnLyricsv2.ViewModels
 
         private async void LoadData()
         {
-            var filePath = Path.Combine("Data", "Songs.xml");
+            var filePath = Path.Combine(System.AppContext.BaseDirectory, "Data", "Songs.xml");
             if (File.Exists(filePath))
             {
                 await LoadFileAsync(filePath);
