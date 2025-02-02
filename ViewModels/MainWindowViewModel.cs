@@ -32,6 +32,9 @@ namespace GetHymnLyricsv2.ViewModels
         [ObservableProperty]
         private Song? selectedSong;
 
+        [ObservableProperty]
+        private bool hasUnsavedChanges;
+
         public static string BaseDirectory => AppContext.BaseDirectory;
 
         public IEnumerable<Song> FilteredSongs => string.IsNullOrWhiteSpace(SearchText) 
@@ -66,6 +69,10 @@ namespace GetHymnLyricsv2.ViewModels
             _dialogService = dialogService;
             SongDetails = songDetails;
             SongSections = songSections;
+
+            // Subscribe to content change events
+            SongDetails.ContentChanged += (s, e) => HasUnsavedChanges = true;
+            SongSections.ContentChanged += (s, e) => HasUnsavedChanges = true;
 
             #if DEBUG
                 LoadSampleData();
@@ -135,7 +142,7 @@ namespace GetHymnLyricsv2.ViewModels
                 }
 
                 await _fileService.SaveFileAsync(_currentFilePath, DataPacket);
-
+                HasUnsavedChanges = false;
                 await _dialogService.ShowInfoAsync("Saved", "File has been saved.", window);
             }
             catch (Exception ex)
@@ -167,6 +174,7 @@ namespace GetHymnLyricsv2.ViewModels
             // Add to the observable collection
             Songs.Add(newSong);
             SelectedSong = newSong;
+            HasUnsavedChanges = true;
         }
 
         [RelayCommand]
@@ -180,6 +188,7 @@ namespace GetHymnLyricsv2.ViewModels
             // Remove from the observable collection
             Songs.Remove(SelectedSong);
             SelectedSong = null;
+            HasUnsavedChanges = true;
         }
 
         [RelayCommand]
@@ -202,6 +211,7 @@ namespace GetHymnLyricsv2.ViewModels
             {
                 DataPacket = await _fileService.LoadFileAsync(filePath);
                 _currentFilePath = filePath;
+                HasUnsavedChanges = false;
 
                 Songs.Clear();
                 if (DataPacket?.RowData?.Row?.Songs?.Items != null)
@@ -216,6 +226,15 @@ namespace GetHymnLyricsv2.ViewModels
             {
                 throw new Exception($"Failed to load file: {ex.Message}", ex);
             }
+        }
+
+        public async Task<bool> ConfirmCloseWithUnsavedChanges(Window window)
+        {
+            return await _dialogService.ShowConfirmationAsync(
+                "Unsaved Changes",
+                "You have unsaved changes. Do you want to close without saving?",
+                window
+            );
         }
 
         partial void OnSelectedSongChanged(Song? value)

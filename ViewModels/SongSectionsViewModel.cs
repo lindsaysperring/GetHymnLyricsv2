@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.ComponentModel;
@@ -5,8 +6,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
 using GetHymnLyricsv2.Services;
-using System;
 using Avalonia.Controls.Documents;
+
 namespace GetHymnLyricsv2.ViewModels
 {
     public enum SectionType
@@ -41,6 +42,7 @@ namespace GetHymnLyricsv2.ViewModels
                 {
                     _section.SectionName = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionName)));
+                    _parent.OnSectionChanged();
                 }
             }
         }
@@ -54,6 +56,7 @@ namespace GetHymnLyricsv2.ViewModels
                 {
                     _section.SectionText = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionText)));
+                    _parent.OnSectionChanged();
                 }
             }
         }
@@ -67,6 +70,7 @@ namespace GetHymnLyricsv2.ViewModels
                 {
                     _section.SectionComments = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionComments)));
+                    _parent.OnSectionChanged();
                 }
             }
         }
@@ -81,6 +85,7 @@ namespace GetHymnLyricsv2.ViewModels
                     _sectionType = value;
                     _parent.UpdateSectionName(this);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SectionType)));
+                    _parent.OnSectionChanged();
                 }
             }
         }
@@ -90,6 +95,7 @@ namespace GetHymnLyricsv2.ViewModels
 
     public partial class SongSectionsViewModel : ViewModelBase
     {
+        public event EventHandler? ContentChanged;
         private readonly ISongService _songService;
         private DataPacket? _dataPacket;
         private Song? _currentSong;
@@ -161,6 +167,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null || _currentSong == null) return;
             _songService.AddSection(_dataPacket, _currentSong, "Verse 1");
             UpdateSections();
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void UpdateSectionName(SectionViewModel section)
@@ -243,6 +250,7 @@ namespace GetHymnLyricsv2.ViewModels
                 SwapSectionIds(section.Section, previousSection.Section);
                 Sections.Move(index, index - 1);
                 UpdateAllSectionNames();
+                ContentChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -256,6 +264,7 @@ namespace GetHymnLyricsv2.ViewModels
                 SwapSectionIds(section.Section, nextSection.Section);
                 Sections.Move(index, index + 1);
                 UpdateAllSectionNames();
+                ContentChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -266,6 +275,7 @@ namespace GetHymnLyricsv2.ViewModels
             _songService.RemoveSection(_dataPacket, section.Section);
             UpdateSections();
             UpdateOrder();
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         [RelayCommand]
@@ -274,6 +284,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null || _currentSong == null || SelectedSection == null) return;
             _songService.AddToOrder(_dataPacket, _currentSong, SelectedSection.Section);
             UpdateOrder();
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         [RelayCommand]
@@ -282,6 +293,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null) return;
             _songService.RemoveFromOrder(_dataPacket, orderItem.OrderEntry);
             UpdateOrder();
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         [RelayCommand]
@@ -290,6 +302,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null) return;
             _songService.MoveOrderUp(_dataPacket, orderItem.OrderEntry);
             UpdateOrder();
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         [RelayCommand]
@@ -298,6 +311,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null) return;
             _songService.MoveOrderDown(_dataPacket, orderItem.OrderEntry);
             UpdateOrder();
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public string FormatSongText()
@@ -347,7 +361,11 @@ namespace GetHymnLyricsv2.ViewModels
             }
 
             return inlineCollection;
+        }
 
+        public void OnSectionChanged()
+        {
+            ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void Clear()
