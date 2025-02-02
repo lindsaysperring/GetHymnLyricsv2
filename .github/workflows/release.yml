@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   build-and-release:
@@ -60,7 +61,7 @@ jobs:
       - name: Copy files (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          copy "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\" "release-package\"
+          copy "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" "release-package\"
 
       - name: Copy files (macOS)
         if: matrix.os == 'macos-latest'
