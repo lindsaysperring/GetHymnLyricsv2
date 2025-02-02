@@ -69,7 +69,7 @@ A cross-platform desktop application for managing and organizing hymn lyrics, bu
 
 ### Prerequisites
 
-- .NET SDK 6.0 or later
+- .NET SDK 8.0 or later
 - Visual Studio 2022 or Visual Studio Code
 
 ### Building from Source
