@@ -22,10 +22,10 @@ jobs:
             output_name: GetHymnLyricsv2.exe
             artifact_name: GetHymnLyricsv2-Windows-x86
             publish_rid: win-x86
-          - os: macos-latest
-            output_name: GetHymnLyricsv2
-            artifact_name: GetHymnLyricsv2-macOS
-            publish_rid: osx-x64
+          # - os: macos-latest
+          #   output_name: GetHymnLyricsv2
+          #   artifact_name: GetHymnLyricsv2-macOS
+          #   publish_rid: osx-x64
 
     steps:
       - uses: actions/checkout@v4
