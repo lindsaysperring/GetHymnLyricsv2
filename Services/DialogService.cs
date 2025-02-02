@@ -80,6 +80,73 @@ namespace GetHymnLyricsv2.Services
         public Task ShowInfoAsync(string title, string message, Window parent)
             => ShowDialogAsync(title, message, DialogType.Info, parent);
 
+        public async Task<bool> ShowConfirmationAsync(string title, string message, Window parent)
+        {
+            var iconBitmap = new Bitmap(AssetLoader.Open(new Uri($"avares://{nameof(GetHymnLyricsv2)}/Assets/gethymnlyrics-logo.ico")));
+            var tcs = new TaskCompletionSource<bool>();
+
+            var dialog = new Window
+            {
+                Title = title,
+                Width = 300,
+                Height = 150,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Icon = new WindowIcon(iconBitmap),
+                Content = new StackPanel
+                {
+                    Margin = new Thickness(20),
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = message,
+                            TextWrapping = TextWrapping.Wrap,
+                            Margin = new Thickness(0, 0, 0, 20)
+                        },
+                        new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Spacing = 10,
+                            Children =
+                            {
+                                new Button
+                                {
+                                    Content = "Yes",
+                                    Width = 80
+                                },
+                                new Button
+                                {
+                                    Content = "No",
+                                    Width = 80
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var stackPanel = (StackPanel)dialog.Content;
+            var buttonPanel = (StackPanel)stackPanel.Children[1];
+            var yesButton = (Button)buttonPanel.Children[0];
+            var noButton = (Button)buttonPanel.Children[1];
+
+            yesButton.Click += (s, e) =>
+            {
+                dialog.Close();
+                tcs.SetResult(true);
+            };
+
+            noButton.Click += (s, e) =>
+            {
+                dialog.Close();
+                tcs.SetResult(false);
+            };
+
+            await dialog.ShowDialog(parent);
+            return await tcs.Task;
+        }
+
         public async Task<string?> OpenFileAsync(Window parent, string title, params string[] extensions)
         {
             var options = new FilePickerOpenOptions
