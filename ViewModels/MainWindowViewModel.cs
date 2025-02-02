@@ -18,6 +18,7 @@ namespace GetHymnLyricsv2.ViewModels
         private readonly ISongService _songService;
         private readonly IDialogService _dialogService;
         private string? _currentFilePath;
+        private const string SongsFileName = "Songs.xml";
 
         [ObservableProperty]
         private DataPacket? dataPacket;
@@ -30,6 +31,8 @@ namespace GetHymnLyricsv2.ViewModels
 
         [ObservableProperty]
         private Song? selectedSong;
+
+        public static string BaseDirectory => AppContext.BaseDirectory;
 
         public IEnumerable<Song> FilteredSongs => string.IsNullOrWhiteSpace(SearchText) 
             ? Songs 
@@ -82,9 +85,21 @@ namespace GetHymnLyricsv2.ViewModels
 
         private async void LoadData()
         {
-            var filePath = Path.Combine(System.AppContext.BaseDirectory, "Data", "Songs.xml");
+            string filePath = OperatingSystem.IsMacOS()
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "com.lindsaysperring.gethymnlyricsv2", "Data", SongsFileName)
+                : Path.Combine(AppContext.BaseDirectory, "Data", SongsFileName);
+            
             if (File.Exists(filePath))
             {
+                await LoadFileAsync(filePath);
+                return;
+            }
+            
+            if (OperatingSystem.IsMacOS())
+            {
+                string appFolder = Path.GetDirectoryName(filePath)!;
+                Directory.CreateDirectory(appFolder);
+                File.Copy(Path.Combine(AppContext.BaseDirectory, "Data", SongsFileName), filePath);
                 await LoadFileAsync(filePath);
             }
         }
