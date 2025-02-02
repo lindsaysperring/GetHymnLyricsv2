@@ -64,7 +64,11 @@ namespace GetHymnLyricsv2.ViewModels
             SongDetails = songDetails;
             SongSections = songSections;
 
-            LoadSampleData();
+            #if DEBUG
+                LoadSampleData();
+            #else
+                LoadData();
+            #endif
         }
 
         private async void LoadSampleData()
@@ -73,6 +77,15 @@ namespace GetHymnLyricsv2.ViewModels
             if (File.Exists(samplePath))
             {
                 await LoadFileAsync(samplePath);
+            }
+        }
+
+        private async void LoadData()
+        {
+            var filePath = Path.Combine("Data", "Songs.xml");
+            if (File.Exists(filePath))
+            {
+                await LoadFileAsync(filePath);
             }
         }
 
