@@ -1,35 +1,58 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 
 namespace GetHymnLyricsv2.Services
 {
+    public enum DialogType
+    {
+        Error,
+        Warning,
+        Info
+    }
+
     public class DialogService : IDialogService
     {
-        public async Task ShowErrorAsync(string title, string message, Window parent)
+
+        private async Task<object> ShowDialogAsync(string title, string message, DialogType type, Window parent)
         {
+            var icon = type switch
+            {
+                DialogType.Error => "❌",
+                DialogType.Warning => "⚠️",
+                _ => "ℹ️"
+            };
+
+            var iconBitmap = new Bitmap(AssetLoader.Open(new Uri($"avares://{nameof(GetHymnLyricsv2)}/Assets/gethymnlyrics-logo.ico")));
+
             var dialog = new Window
             {
                 Title = title,
                 Width = 300,
                 Height = 150,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Icon = new WindowIcon(iconBitmap),
                 Content = new StackPanel
                 {
-                    Margin = new Avalonia.Thickness(20),
+                    Margin = new Thickness(20),
                     Children =
                     {
                         new TextBlock
                         {
-                            Text = message,
-                            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                            Margin = new Avalonia.Thickness(0, 0, 0, 20)
+                            Text = $"{icon} {message}",
+                            TextWrapping = TextWrapping.Wrap,
+                            Margin = new Thickness(0, 0, 0, 20)
                         },
                         new Button
                         {
                             Content = "OK",
-                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center
+                            HorizontalAlignment = HorizontalAlignment.Center
                         }
                     }
                 }
@@ -45,8 +68,17 @@ namespace GetHymnLyricsv2.Services
             };
 
             await dialog.ShowDialog(parent);
-            await tcs.Task;
+            return await tcs.Task;
         }
+
+        public Task ShowErrorAsync(string title, string message, Window parent)
+            => ShowDialogAsync(title, message, DialogType.Error, parent);
+
+        public Task ShowWarningAsync(string title, string message, Window parent)
+            => ShowDialogAsync(title, message, DialogType.Warning, parent);
+
+        public Task ShowInfoAsync(string title, string message, Window parent)
+            => ShowDialogAsync(title, message, DialogType.Info, parent);
 
         public async Task<string?> OpenFileAsync(Window parent, string title, params string[] extensions)
         {

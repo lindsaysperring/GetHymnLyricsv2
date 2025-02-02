@@ -11,5 +11,6 @@
   
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://GetHymnLyricsv2/Styles/Icons.axaml" />
     </Application.Styles>
 </Application>

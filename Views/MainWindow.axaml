@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
-        xmlns:local="clr-namespace:GetHymnLyricsv2"
         xmlns:views="clr-namespace:GetHymnLyricsv2.Views"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="GetHymnLyricsv2.Views.MainWindow"
@@ -12,61 +11,64 @@
         Icon="/Assets/gethymnlyrics-logo.ico"
         Title="Hymn Editor">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+		<vm:MainWindowViewModel/>
+	</Design.DataContext>
 
-    <Grid RowDefinitions="Auto,*">
-        <!-- Toolbar -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-            <Button Command="{Binding OpenFileCommand}" 
+	<Grid RowDefinitions="Auto,*">
+		<!-- Toolbar -->
+		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+			<Button Command="{Binding OpenFileCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Content="Open File" 
+                    Content="Open File"
                     Margin="0,0,10,0"/>
-            <Button Command="{Binding SaveFileCommand}" 
+			<Button Command="{Binding SaveFileCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     Content="Save File"/>
-        </StackPanel>
+		</StackPanel>
 
-        <!-- Main Content -->
-        <Grid Grid.Row="1" ColumnDefinitions="300,*">
-            <!-- Song List -->
-            <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Margin="10">
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <Button Command="{Binding AddSongCommand}"
+		<!-- Main Content -->
+		<Grid Grid.Row="1" ColumnDefinitions="300,*">
+			<!-- Song List -->
+			<Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Margin="10">
+				<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+					<Button Command="{Binding AddSongCommand}"
                             Content="Add Song"
                             Margin="0,0,10,0"/>
-                    <Button Command="{Binding DeleteSongCommand}"
+					<Button Command="{Binding DeleteSongCommand}"
                             Content="Delete Song"
                             IsEnabled="{Binding SelectedSong, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-                </StackPanel>
-                <TextBox Grid.Row="1"
+				</StackPanel>
+				<TextBox Grid.Row="1"
                         Text="{Binding SearchText}"
                         Watermark="Search songs..."
                         Margin="0,0,0,10"/>
-                <ListBox Grid.Row="2"
+				<ListBox Grid.Row="2"
                         ItemsSource="{Binding FilteredSongs}"
                         SelectedItem="{Binding SelectedSong}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Number, StringFormat='#{0}'}" 
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<StackPanel>
+								<TextBlock Text="{Binding Number, StringFormat='#{0}'}"
                                         FontWeight="Bold"/>
-                                <TextBlock Text="{Binding Title}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
+								<TextBlock Text="{Binding Title}"/>
+							</StackPanel>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</Grid>
 
-            <!-- Song Details and Sections -->
-            <TabControl Grid.Column="1" IsVisible="{Binding SelectedSong, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
-                <TabItem Header="Editor">
-                    <views:EditorView DataContext="{Binding}"/>
-                </TabItem>
-            </TabControl>
-        </Grid>
-    </Grid>
+			<!-- Song Details and Sections -->
+			<TabControl Grid.Column="1" IsVisible="{Binding SelectedSong, Converter={x:Static ObjectConverters.IsNotNull}}" VerticalAlignment="Stretch">
+				<TabItem Header="Editor">
+					<views:EditorView DataContext="{Binding}"/>
+				</TabItem>
+				<TabItem Header="Preview">
+					<views:PreviewView DataContext="{Binding}"/>
+				</TabItem>
+			</TabControl>
+		</Grid>
+	</Grid>
 </Window>

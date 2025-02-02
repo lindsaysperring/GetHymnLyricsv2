@@ -107,6 +107,8 @@ namespace GetHymnLyricsv2.ViewModels
                 }
 
                 await _fileService.SaveFileAsync(_currentFilePath, DataPacket);
+
+                await _dialogService.ShowInfoAsync("Saved", "File has been saved.", window);
             }
             catch (Exception ex)
             {
@@ -150,6 +152,20 @@ namespace GetHymnLyricsv2.ViewModels
             // Remove from the observable collection
             Songs.Remove(SelectedSong);
             SelectedSong = null;
+        }
+
+        [RelayCommand]
+        private async Task CopyToClipboard(Window window)
+        {
+            if (SongSections != null)
+            {
+                var clipboard = window.Clipboard;
+                if (clipboard != null)
+                {
+                    await clipboard.SetTextAsync(SongSections.FormatSongText());
+                    await _dialogService.ShowInfoAsync("Copied", "Text has been copied to clipboard.", window);
+                }
+            }
         }
 
         private async Task LoadFileAsync(string filePath)

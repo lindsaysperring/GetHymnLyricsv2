@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
 using GetHymnLyricsv2.Services;
 using System;
+using Avalonia.Controls.Documents;
 namespace GetHymnLyricsv2.ViewModels
 {
     public enum SectionType
@@ -102,6 +103,8 @@ namespace GetHymnLyricsv2.ViewModels
         [ObservableProperty]
         private ObservableCollection<MainWindowViewModel.OrderItem> songOrder = new();
 
+        public InlineCollection FormattedInlineText => FormatSongTextCollection();
+
         public SongSectionsViewModel(ISongService songService)
         {
             _songService = songService;
@@ -113,6 +116,8 @@ namespace GetHymnLyricsv2.ViewModels
             _currentSong = song;
             UpdateSections();
             UpdateOrder();
+
+            OnPropertyChanged(nameof(FormattedInlineText));
         }
 
         private void UpdateSections()
@@ -293,6 +298,56 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null) return;
             _songService.MoveOrderDown(_dataPacket, orderItem.OrderEntry);
             UpdateOrder();
+        }
+
+        public string FormatSongText()
+        {
+            if (_currentSong == null) return string.Empty;
+
+            var stringBuilder = new System.Text.StringBuilder();
+
+            stringBuilder.AppendLine($"{_currentSong.Number} - {_currentSong.Title}");
+
+            foreach (var section in SongOrder.Select(o => o.Section))
+            {                
+                stringBuilder.AppendLine();
+                
+                string sectionName = section.SectionName.Equals("Refrain", StringComparison.OrdinalIgnoreCase) 
+                    ? "Chorus" 
+                    : section.SectionName;
+                stringBuilder.AppendLine($"{sectionName}");
+                stringBuilder.AppendLine(section.SectionText.Trim());
+            }
+
+            return stringBuilder.ToString().Trim();
+        }
+
+        private InlineCollection FormatSongTextCollection()
+        {
+            var inlineCollection = new InlineCollection();
+
+            if (_currentSong == null) return inlineCollection;
+
+            inlineCollection.Add(new Run($"{_currentSong.Number} - {_currentSong.Title}") { FontWeight = Avalonia.Media.FontWeight.Bold });
+            inlineCollection.Add(new LineBreak());
+
+            foreach (var section in SongOrder.Select(o => o.Section))
+            {
+                if (inlineCollection.Count > 0)
+                {
+                    inlineCollection.Add(new LineBreak());
+                }
+
+                string sectionName = section.SectionName.Equals("Refrain", StringComparison.OrdinalIgnoreCase)
+                    ? "Chorus"
+                    : section.SectionName;
+                inlineCollection.Add(new Run(sectionName) { FontWeight = Avalonia.Media.FontWeight.Bold });
+                inlineCollection.Add(new LineBreak());
+                inlineCollection.Add(new Run(section.SectionText));
+            }
+
+            return inlineCollection;
+
         }
 
         public void Clear()
