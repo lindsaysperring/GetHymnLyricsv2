@@ -20,7 +20,7 @@ jobs:
             artifact_name: GetHymnLyricsv2-Windows-x86
             publish_rid: win-x86
           - os: macos-latest
-            output_name: GetHymnLyricsv2.app
+            output_name: GetHymnLyricsv2
             artifact_name: GetHymnLyricsv2-macOS
             publish_rid: osx-x64
 
@@ -35,7 +35,8 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Publish
+      - name: Publish (Windows)
+        if: matrix.os == 'windows-latest'
         run: |
           dotnet publish -c Release -r ${{ matrix.publish_rid }} \
           --self-contained true \
@@ -43,20 +44,31 @@ jobs:
           -p:IncludeNativeLibrariesForSelfExtract=true \
           -p:EnableCompressionInSingleFile=true
 
+      - name: Publish (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          dotnet publish -c Release -r ${{ matrix.publish_rid }} \
+          --self-contained true \
+          -p:PublishSingleFile=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          -p:EnableCompressionInSingleFile=true \
+          -p:IncludeAllContentForSelfExtract=true
+
       - name: Create output directory
         run: mkdir release-package
 
       - name: Copy files (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          copy "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\${{ matrix.output_name }}" "release-package\"
-          copy "Data\Songs.xml" "release-package\"
+          copy "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\" "release-package\"
 
       - name: Copy files (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          cp -r "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}" "release-package/"
-          cp "Data/Songs.xml" "release-package/"
+          chmod +x "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
+          cp "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}" "release-package/"
+          mkdir "release-package/Data"
+          cp "Data/Songs.xml" "release-package/Data"
           
       - name: Create DMG (macOS)
         if: matrix.os == 'macos-latest'
