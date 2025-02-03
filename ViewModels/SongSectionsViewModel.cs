@@ -167,6 +167,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null || _currentSong == null) return;
             _songService.AddSection(_dataPacket, _currentSong, "Verse 1");
             UpdateSections();
+            UpdateOrder();
             ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
