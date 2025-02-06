@@ -1,14 +1,17 @@
-﻿﻿using System;
+﻿﻿﻿﻿﻿﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
 using GetHymnLyricsv2.Services;
+using GetHymnLyricsv2.Views;
 
 namespace GetHymnLyricsv2.ViewModels
 {
@@ -17,6 +20,7 @@ namespace GetHymnLyricsv2.ViewModels
         private readonly IFileService _fileService;
         private readonly ISongService _songService;
         private readonly IDialogService _dialogService;
+        private readonly ISettingsService _settingsService;
         private string? _currentFilePath;
         private const string SongsFileName = "Songs.xml";
 
@@ -61,12 +65,14 @@ namespace GetHymnLyricsv2.ViewModels
             IFileService fileService,
             ISongService songService,
             IDialogService dialogService,
+            ISettingsService settingsService,
             SongDetailsViewModel songDetails,
             SongSectionsViewModel songSections)
         {
             _fileService = fileService;
             _songService = songService;
             _dialogService = dialogService;
+            _settingsService = settingsService;
             SongDetails = songDetails;
             SongSections = songSections;
 
@@ -235,6 +241,17 @@ namespace GetHymnLyricsv2.ViewModels
                 "You have unsaved changes. Do you want to close without saving?",
                 window
             );
+        }
+
+        [RelayCommand]
+        private async Task OpenSettings(Window window)
+        {
+            var settingsWindow = new SettingsWindow
+            {
+                DataContext = new SettingsViewModel(_settingsService)
+            };
+
+            await settingsWindow.ShowDialog(window);
         }
 
         partial void OnSelectedSongChanged(Song? value)

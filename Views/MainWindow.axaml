@@ -19,15 +19,21 @@
 
 	<Grid RowDefinitions="Auto,*">
 		<!-- Toolbar -->
-		<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-			<Button Command="{Binding OpenFileCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Content="Open File"
-                    Margin="0,0,10,0"/>
-			<Button Command="{Binding SaveFileCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                    Content="Save File"/>
-		</StackPanel>
+		<Grid Grid.Row="0" Margin="10">
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+				<Button Command="{Binding OpenFileCommand}"
+						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+						Content="Open File"
+						Margin="0,0,10,0"/>
+				<Button Command="{Binding SaveFileCommand}"
+						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+						Content="Save File"/>
+			</StackPanel>
+			<Button HorizontalAlignment="Right"
+					Command="{Binding OpenSettingsCommand}"
+					CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+					Content="Settings"/>
+		</Grid>
 
 		<!-- Main Content -->
 		<Grid Grid.Row="1" ColumnDefinitions="300,*">

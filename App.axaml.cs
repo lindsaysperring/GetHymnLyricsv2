@@ -28,6 +28,7 @@ namespace GetHymnLyricsv2
             services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<ISongService, SongService>();
             services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<ISettingsService, SettingsService>();
 
             // Register view models
             services.AddTransient<SongDetailsViewModel>();

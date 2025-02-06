@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:GetHymnLyricsv2.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="300"
+        x:Class="GetHymnLyricsv2.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Settings"
+        Width="450" Height="400"
+        WindowStartupLocation="CenterOwner"
+		ExtendClientAreaChromeHints="NoChrome"
+		ExtendClientAreaToDecorationsHint="True">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="*, Auto">
+        <ScrollViewer Grid.Row="0">
+            <StackPanel Margin="20">
+                <TextBlock Text="Settings"
+                         FontSize="24"
+                         FontWeight="SemiBold"
+                         Margin="0,0,0,20"/>
+
+                <!-- Section Symbol Settings -->
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="Section Symbol"
+                                 FontSize="18"
+                                 FontWeight="SemiBold"/>
+
+                        <!-- Last Section Symbol -->
+                        <StackPanel>
+                            <TextBlock Text="Symbol"
+                                     Margin="0,0,0,8"/>
+                            <TextBox Text="{Binding LastSectionSymbol}"
+                                    MaxLength="1"
+                                    Width="100"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+
+                        <!-- Symbol Location -->
+                        <StackPanel>
+                            <TextBlock Text="Symbol Location"
+                                     Margin="0,0,0,8"/>
+                            <ComboBox ItemsSource="{Binding SymbolLocations}"
+                                    SelectedItem="{Binding LastSectionSymbolLocation}"
+                                    Width="200"
+                                    HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Buttons always at bottom -->
+        <StackPanel Grid.Row="1" 
+                  Orientation="Horizontal" 
+                  HorizontalAlignment="Right" 
+                  Margin="20">
+            <Button Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Content="Cancel"
+                    Margin="0,0,10,0"/>
+            <Button Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Content="Save"
+                    Margin="0,0,10,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
