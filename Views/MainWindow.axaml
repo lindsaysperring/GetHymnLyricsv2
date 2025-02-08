@@ -17,9 +17,27 @@
 		<vm:MainWindowViewModel/>
 	</Design.DataContext>
 
-	<Grid RowDefinitions="Auto,*">
+	<Grid RowDefinitions="Auto,Auto,*">
+		<!-- Update Banner -->
+		<Border Grid.Row="0" 
+				Background="#007ACC" 
+				Padding="10"
+				IsVisible="{Binding UpdateAvailable}">
+			<Grid ColumnDefinitions="*,Auto">
+				<TextBlock Grid.Column="0" 
+						  Text="{Binding UpdateVersion, StringFormat='Version {0} is available!'}"
+						  Foreground="White"
+						  VerticalAlignment="Center"/>
+				<Button Grid.Column="1"
+						Content="View Update"
+						Command="{Binding OpenUpdateInfoCommand}"
+						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+						Margin="10,0,0,0"/>
+			</Grid>
+		</Border>
+
 		<!-- Toolbar -->
-		<Grid Grid.Row="0" Margin="10">
+		<Grid Grid.Row="1" Margin="10">
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 				<Button Command="{Binding OpenFileCommand}"
 						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
@@ -29,14 +47,18 @@
 						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
 						Content="Save File"/>
 			</StackPanel>
-			<Button HorizontalAlignment="Right"
-					Command="{Binding OpenSettingsCommand}"
-					CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-					Content="Settings"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+				<Button Command="{Binding CheckForUpdatesCommand}"
+						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+						Content="Check for Updates"/>
+				<Button Command="{Binding OpenSettingsCommand}"
+						CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+						Content="Settings"/>
+			</StackPanel>
 		</Grid>
 
 		<!-- Main Content -->
-		<Grid Grid.Row="1" ColumnDefinitions="300,*">
+		<Grid Grid.Row="2" ColumnDefinitions="300,*">
 			<!-- Song List -->
 			<Grid Grid.Column="0" RowDefinitions="Auto,Auto,*" Margin="10">
 				<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">

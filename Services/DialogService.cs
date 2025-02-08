@@ -92,33 +92,36 @@ namespace GetHymnLyricsv2.Services
                 Height = 150,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Icon = new WindowIcon(iconBitmap),
-                Content = new StackPanel
+                Content = new ScrollViewer
                 {
-                    Margin = new Thickness(20),
-                    Children =
+                    Content = new StackPanel
                     {
-                        new TextBlock
+                        Margin = new Thickness(20),
+                        Children =
                         {
-                            Text = message,
-                            TextWrapping = TextWrapping.Wrap,
-                            Margin = new Thickness(0, 0, 0, 20)
-                        },
-                        new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            Spacing = 10,
-                            Children =
+                            new TextBlock
                             {
-                                new Button
+                                Text = message,
+                                TextWrapping = TextWrapping.Wrap,
+                                Margin = new Thickness(0, 0, 0, 20)
+                            },
+                            new StackPanel
+                            {
+                                Orientation = Orientation.Horizontal,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                Spacing = 10,
+                                Children =
                                 {
-                                    Content = "Yes",
-                                    Width = 80
-                                },
-                                new Button
-                                {
-                                    Content = "No",
-                                    Width = 80
+                                    new Button
+                                    {
+                                        Content = "Yes",
+                                        Width = 80
+                                    },
+                                    new Button
+                                    {
+                                        Content = "No",
+                                        Width = 80
+                                    }
                                 }
                             }
                         }
@@ -126,7 +129,11 @@ namespace GetHymnLyricsv2.Services
                 }
             };
 
-            var stackPanel = (StackPanel)dialog.Content;
+            var scrollViewer = (ScrollViewer)dialog.Content;
+            if (scrollViewer.Content is not StackPanel stackPanel)
+            {
+                throw new InvalidOperationException("ScrollViewer content is not a StackPanel.");
+            }
             var buttonPanel = (StackPanel)stackPanel.Children[1];
             var yesButton = (Button)buttonPanel.Children[0];
             var noButton = (Button)buttonPanel.Children[1];

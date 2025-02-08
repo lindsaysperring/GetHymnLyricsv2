@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -21,7 +21,9 @@ namespace GetHymnLyricsv2.ViewModels
         private readonly ISongService _songService;
         private readonly IDialogService _dialogService;
         private readonly ISettingsService _settingsService;
+        private readonly IUpdateService _updateService;
         private string? _currentFilePath;
+        private UpdateInfo? _updateInfo;
         private const string SongsFileName = "Songs.xml";
 
         [ObservableProperty]
@@ -38,6 +40,12 @@ namespace GetHymnLyricsv2.ViewModels
 
         [ObservableProperty]
         private bool hasUnsavedChanges;
+
+        [ObservableProperty]
+        private bool updateAvailable;
+
+        [ObservableProperty]
+        private string? updateVersion;
 
         public static string BaseDirectory => AppContext.BaseDirectory;
 
@@ -67,7 +75,8 @@ namespace GetHymnLyricsv2.ViewModels
             IDialogService dialogService,
             ISettingsService settingsService,
             SongDetailsViewModel songDetails,
-            SongSectionsViewModel songSections)
+            SongSectionsViewModel songSections,
+            IUpdateService updateService)
         {
             _fileService = fileService;
             _songService = songService;
@@ -75,6 +84,7 @@ namespace GetHymnLyricsv2.ViewModels
             _settingsService = settingsService;
             SongDetails = songDetails;
             SongSections = songSections;
+            _updateService = updateService;
 
             // Subscribe to content change events
             SongDetails.ContentChanged += (s, e) => HasUnsavedChanges = true;
@@ -85,6 +95,8 @@ namespace GetHymnLyricsv2.ViewModels
             #else
                 LoadData();
             #endif
+
+            _ = CheckForUpdates(null);
         }
 
         private async void LoadSampleData()
@@ -252,6 +264,107 @@ namespace GetHymnLyricsv2.ViewModels
             };
 
             await settingsWindow.ShowDialog(window);
+        }
+
+        [RelayCommand]
+        private async Task CheckForUpdates(Window? window)
+        {
+            try
+            {
+                var force = window != null; // user clicked the button
+
+                if (!force && !await _updateService.ShouldCheckForUpdates())
+                {
+                    if (window != null)
+                    {
+                        await _dialogService.ShowInfoAsync("Update Check", "Already checked for updates recently.", window);
+                    }
+                    return;
+                }
+
+                var updateInfo = await _updateService.CheckForUpdatesAsync();
+                if (updateInfo == null)
+                {
+                    if (window != null)
+                    {
+                        await _dialogService.ShowInfoAsync("Update Check", "Failed to check for updates.", window);
+                    }
+                    return;
+                }
+
+                var currentVersion = typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString() ?? "1.0.0";
+                if (_updateService.IsUpdateAvailable(currentVersion, updateInfo.Version))
+                {
+                    _updateInfo = updateInfo;
+                    UpdateVersion = updateInfo.Version;
+                    UpdateAvailable = true;
+
+                    if (window != null)
+                    {
+                        var result = await _dialogService.ShowConfirmationAsync(
+                            "Update Available",
+                            $"Version {updateInfo.Version} is available. Would you like to view the release notes?",
+                            window);
+
+                        if (result)
+                        {
+                            await OpenUpdateInfo(window);
+                        }
+                    }
+                }
+                else if (window != null)
+                {
+                    await _dialogService.ShowInfoAsync("Update Check", "You are using the latest version.", window);
+                }
+
+                await _updateService.UpdateLastCheckTime();
+            }
+            catch (Exception ex)
+            {
+                if (window != null)
+                {
+                    await _dialogService.ShowErrorAsync("Error", $"Failed to check for updates: {ex.Message}", window);
+                }
+            }
+        }
+
+        [RelayCommand]
+        private async Task OpenUpdateInfo(Window window)
+        {
+            if (_updateInfo != null)
+            {
+                var result = await _dialogService.ShowConfirmationAsync(
+                    $"Update {_updateInfo.Version}",
+                    $"Release Notes:\n{_updateInfo.ReleaseNotes}\n\nWould you like to download the update?",
+                    window);
+
+                if (result)
+                {
+                    try
+                    {
+                        if (OperatingSystem.IsWindows())
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = _updateInfo.DownloadUrl,
+                                UseShellExecute = true
+                            });
+                        }
+                        else if (OperatingSystem.IsMacOS())
+                        {
+                            System.Diagnostics.Process.Start("open", _updateInfo.DownloadUrl);
+                        }
+                        else if (OperatingSystem.IsLinux())
+                        {
+                            System.Diagnostics.Process.Start("xdg-open", _updateInfo.DownloadUrl);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await _dialogService.ShowErrorAsync("Error", $"Failed to open download URL: {ex.Message}", window);
+                    }
+                }
+            }
         }
 
         partial void OnSelectedSongChanged(Song? value)

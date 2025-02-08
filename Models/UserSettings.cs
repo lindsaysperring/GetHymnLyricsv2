@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 using System.Text.Json.Serialization;
 
 namespace GetHymnLyricsv2.Models
@@ -7,6 +8,8 @@ namespace GetHymnLyricsv2.Models
     {
         private string _lastSectionSymbol = "Ω";
         private SectionSymbolLocation _lastSectionSymbolLocation = SectionSymbolLocation.None;
+        private DateTime _lastUpdateCheck = DateTime.MinValue;
+        private int _updateCheckFrequencyHours = 24;
 
         public string LastSectionSymbol
         {
@@ -18,6 +21,18 @@ namespace GetHymnLyricsv2.Models
         {
             get => _lastSectionSymbolLocation;
             set => SetProperty(ref _lastSectionSymbolLocation, value);
+        }
+
+        public DateTime LastUpdateCheck
+        {
+            get => _lastUpdateCheck;
+            set => SetProperty(ref _lastUpdateCheck, value);
+        }
+
+        public int UpdateCheckFrequencyHours
+        {
+            get => _updateCheckFrequencyHours;
+            set => SetProperty(ref _updateCheckFrequencyHours, value);
         }
 
         [JsonConstructor]
