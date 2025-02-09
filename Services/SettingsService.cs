@@ -19,8 +19,7 @@ namespace GetHymnLyricsv2.Services
             if (OperatingSystem.IsMacOS())
             {
                 appDataPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "GetHymnLyricsv2"
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "com.lindsaysperring.gethymnlyricsv2", "Data", "GetHymnLyricsv2"
                 );
             }
             else
