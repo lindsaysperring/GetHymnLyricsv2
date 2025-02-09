@@ -14,10 +14,19 @@ namespace GetHymnLyricsv2.Services
 
         public SettingsService()
         {
-            string appDataPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "GetHymnLyricsv2"
-            );
+            string appDataPath;
+
+            if (OperatingSystem.IsMacOS())
+            {
+                appDataPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "GetHymnLyricsv2"
+                );
+            }
+            else
+            {
+                appDataPath = Path.Combine(AppContext.BaseDirectory, "Data");
+            }
             
             if (!Directory.Exists(appDataPath))
             {
