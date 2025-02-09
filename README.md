@@ -41,7 +41,6 @@ A cross-platform desktop application for managing and organizing hymn lyrics, bu
 2. **Edit a Hymn**:
    - Select a hymn from the list
    - Modify the details in the editor
-   - Changes are saved automatically
 
 3. **Delete a Hymn**:
    - Select a hymn from the list

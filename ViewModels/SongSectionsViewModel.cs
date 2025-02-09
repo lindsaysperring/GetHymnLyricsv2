@@ -93,10 +93,11 @@ namespace GetHymnLyricsv2.ViewModels
         public SongSection Section => _section;
     }
 
-    public partial class SongSectionsViewModel : ViewModelBase
+    public partial class SongSectionsViewModel : ViewModelBase, IDisposable
     {
         public event EventHandler? ContentChanged;
         private readonly ISongService _songService;
+        private readonly ISettingsService _settingsService;
         private DataPacket? _dataPacket;
         private Song? _currentSong;
 
@@ -111,9 +112,12 @@ namespace GetHymnLyricsv2.ViewModels
 
         public InlineCollection FormattedInlineText => FormatSongTextCollection();
 
-        public SongSectionsViewModel(ISongService songService)
+        public SongSectionsViewModel(ISongService songService, ISettingsService settingsService)
         {
             _songService = songService;
+            _settingsService = settingsService;
+
+            _settingsService.Settings.PropertyChanged += OnSettingsChanged;
         }
 
         public void Initialize(DataPacket dataPacket, Song song)
@@ -167,6 +171,7 @@ namespace GetHymnLyricsv2.ViewModels
             if (_dataPacket == null || _currentSong == null) return;
             _songService.AddSection(_dataPacket, _currentSong, "Verse 1");
             UpdateSections();
+            UpdateOrder();
             ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -320,17 +325,18 @@ namespace GetHymnLyricsv2.ViewModels
 
             var stringBuilder = new System.Text.StringBuilder();
 
-            stringBuilder.AppendLine($"{_currentSong.Number} - {_currentSong.Title}");
+            var collection = FormatSongTextCollection();
 
-            foreach (var section in SongOrder.Select(o => o.Section))
-            {                
-                stringBuilder.AppendLine();
-                
-                string sectionName = section.SectionName.Equals("Refrain", StringComparison.OrdinalIgnoreCase) 
-                    ? "Chorus" 
-                    : section.SectionName;
-                stringBuilder.AppendLine($"{sectionName}");
-                stringBuilder.AppendLine(section.SectionText.Trim());
+            foreach (var inline in collection)
+            {
+                if (inline is Run run)
+                {
+                    stringBuilder.Append(run.Text);
+                }
+                else if (inline is LineBreak)
+                {
+                    stringBuilder.AppendLine();
+                }
             }
 
             return stringBuilder.ToString().Trim();
@@ -345,8 +351,11 @@ namespace GetHymnLyricsv2.ViewModels
             inlineCollection.Add(new Run($"{_currentSong.Number} - {_currentSong.Title}") { FontWeight = Avalonia.Media.FontWeight.Bold });
             inlineCollection.Add(new LineBreak());
 
-            foreach (var section in SongOrder.Select(o => o.Section))
+            foreach (var order in SongOrder)
             {
+                var section = order.Section;
+                var isLastSection = SongOrder.Last() == order;
+
                 if (inlineCollection.Count > 0)
                 {
                     inlineCollection.Add(new LineBreak());
@@ -357,10 +366,28 @@ namespace GetHymnLyricsv2.ViewModels
                     : section.SectionName;
                 inlineCollection.Add(new Run(sectionName) { FontWeight = Avalonia.Media.FontWeight.Bold });
                 inlineCollection.Add(new LineBreak());
+
+                if (isLastSection && (_settingsService.Settings.LastSectionSymbolLocation == SectionSymbolLocation.Start || _settingsService.Settings.LastSectionSymbolLocation == SectionSymbolLocation.Both))
+                {
+                    inlineCollection.Add(new Run(_settingsService.Settings.LastSectionSymbol) { FontStyle = Avalonia.Media.FontStyle.Italic });
+                    inlineCollection.Add(new LineBreak());
+                }
+
                 inlineCollection.Add(new Run(section.SectionText));
+
+                if (isLastSection && (_settingsService.Settings.LastSectionSymbolLocation == SectionSymbolLocation.End || _settingsService.Settings.LastSectionSymbolLocation == SectionSymbolLocation.Both))
+                {
+                    inlineCollection.Add(new Run(_settingsService.Settings.LastSectionSymbol) { FontStyle = Avalonia.Media.FontStyle.Italic });
+                }
             }
 
             return inlineCollection;
+        }
+
+
+        private void OnSettingsChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(FormattedInlineText));
         }
 
         public void OnSectionChanged()
@@ -375,6 +402,11 @@ namespace GetHymnLyricsv2.ViewModels
             SelectedSection = null;
             _dataPacket = null;
             _currentSong = null;
+        }
+
+        public void Dispose()
+        {
+            _settingsService.Settings.PropertyChanged -= OnSettingsChanged;
         }
     }
 }
