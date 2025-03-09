@@ -38,17 +38,16 @@ jobs:
       - name: Publish (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          cd GetHymnLyricsv2
           dotnet publish -c Release -r ${{ matrix.publish_rid }} `
           --self-contained true `
           -p:PublishSingleFile=true `
+          -p:UseAppHost=true `
           -p:IncludeNativeLibrariesForSelfExtract=true `
           -p:EnableCompressionInSingleFile=true
 
       - name: Publish (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          cd GetHymnLyricsv2
           dotnet publish -c Release -r ${{ matrix.publish_rid }} \
           --self-contained true \
           -p:UseAppHost=true
@@ -59,7 +58,7 @@ jobs:
       - name: Copy files (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          powershell Compress-Archive -Path "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
+          powershell Compress-Archive -Path "GetHymnLyricsv2\bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
 
       - name: Create App Bundle (macOS)
         if: matrix.os == 'macos-latest'
@@ -73,12 +72,12 @@ jobs:
           mkdir -p "$APP_CONTENTS/Resources"
           
           # Copy executable and make it executable
-          chmod +x "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
-          cp -r "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/" "$APP_CONTENTS/MacOS/"
+          chmod +x "GetHymnLyricsv2/bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
+          cp -r "GetHymnLyricsv2/bin/Release/net8.0/${{ matrix.publish_rid }}/publish/" "$APP_CONTENTS/MacOS/"
           
           # Copy data files
           mkdir -p "$APP_CONTENTS/Resources/Data"
-          cp "Data/Songs.xml" "$APP_CONTENTS/Resources/Data/"
+          cp "GetHymnLyricsv2/Data/Songs.xml" "$APP_CONTENTS/Resources/Data/"
           
           # Copy icon if it exists
           cp "Assets/gethymnlyrics-logo.ico" "$APP_CONTENTS/Resources/gethymnlyrics.icns" || true
