@@ -9,7 +9,7 @@ namespace GetHymnLyricsv2.Services
         Task ShowWarningAsync(string title, string message, Window parent);
         Task ShowInfoAsync(string title, string message, Window parent);
         Task<string?> OpenFileAsync(Window parent, string title, params string[] extensions);
-        Task<string?> SaveFileAsync(Window parent, string title, string defaultExtension, params string[] extensions);
+        Task<string?> SaveFileAsync(Window parent, string title, string defaultExtension, string? suggestedFileName = null, string? fileTypeName = null, params string[] extensions);
         Task<bool> ShowConfirmationAsync(string title, string message, Window parent);
     }
 }

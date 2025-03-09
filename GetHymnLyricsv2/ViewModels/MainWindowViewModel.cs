@@ -5,11 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
+using GetHymnLyricsv2.Models.PreviewFormats.Interfaces;
 using GetHymnLyricsv2.Services;
 using GetHymnLyricsv2.Views;
 
@@ -26,14 +25,39 @@ namespace GetHymnLyricsv2.ViewModels
         private UpdateInfo? _updateInfo;
         private const string SongsFileName = "Songs.xml";
 
+        private readonly IEnumerable<IPreviewFormat> _previewFormats = Array.Empty<IPreviewFormat>();
+
+        [ObservableProperty]
+        private IPreviewFormat? selectedFormat;
+
         [ObservableProperty]
         private DataPacket? dataPacket;
+
+        public IEnumerable<IPreviewFormat> PreviewFormats => _previewFormats;
 
         [ObservableProperty]
         private ObservableCollection<Song> songs = new();
 
         [ObservableProperty]
         private string searchText = string.Empty;
+
+        [ObservableProperty]
+        private ObservableCollection<MenuItem> _formatMenuItems = new();
+
+        partial void OnSelectedFormatChanged(IPreviewFormat? value)
+        {
+            if (value != null)
+            {
+                _settingsService.Settings.LastPreviewFormat = value.Name;
+                _settingsService.SaveSettings();
+            }
+        }
+
+        [RelayCommand]
+        private void OnFormatSelected(IPreviewFormat format)
+        {
+            SelectedFormat = format;
+        }
 
         [ObservableProperty]
         private Song? selectedSong;
@@ -76,7 +100,8 @@ namespace GetHymnLyricsv2.ViewModels
             ISettingsService settingsService,
             SongDetailsViewModel songDetails,
             SongSectionsViewModel songSections,
-            IUpdateService updateService)
+            IUpdateService updateService,
+            IEnumerable<IPreviewFormat> previewFormats)
         {
             _fileService = fileService;
             _songService = songService;
@@ -85,6 +110,11 @@ namespace GetHymnLyricsv2.ViewModels
             SongDetails = songDetails;
             SongSections = songSections;
             _updateService = updateService;
+            _previewFormats = previewFormats;
+
+            // Initialize selected format
+            SelectedFormat = _previewFormats.FirstOrDefault(f => f.Name == _settingsService.Settings.LastPreviewFormat)
+                ?? _previewFormats.First();
 
             // Subscribe to content change events
             SongDetails.ContentChanged += (s, e) => HasUnsavedChanges = true;
@@ -97,6 +127,8 @@ namespace GetHymnLyricsv2.ViewModels
             #endif
 
             _ = CheckForUpdates(null);
+
+            BuildFormatMenu();
         }
 
         private async void LoadSampleData()
@@ -212,14 +244,48 @@ namespace GetHymnLyricsv2.ViewModels
         [RelayCommand]
         private async Task CopyToClipboard(Window window)
         {
-            if (SongSections != null)
+            if (SongSections == null || SelectedFormat == null || !SelectedFormat.SupportsCopy) return;
+
+            try
             {
                 var clipboard = window.Clipboard;
-                if (clipboard != null)
+                if (clipboard != null && SelectedSong != null)
                 {
-                    await clipboard.SetTextAsync(SongSections.FormatSongText());
-                    await _dialogService.ShowInfoAsync("Copied", "Text has been copied to clipboard.", window);
+                    await clipboard.SetTextAsync(SelectedFormat.FormatForCopy(SelectedSong, SongSections.SongOrder));
+                    await _dialogService.ShowInfoAsync("Copied", $"Text has been copied to clipboard in {SelectedFormat.Name} format.", window);
                 }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowErrorAsync("Error", $"Failed to copy to clipboard: {ex.Message}", window);
+            }
+        }
+
+        [RelayCommand]
+        private async Task ExportToFile(Window window)
+        {
+            if (SongSections == null || SelectedFormat == null || !SelectedFormat.SupportsExport) return;
+
+            try
+            {
+                if (SelectedSong != null)
+                {
+                    var fileType = SelectedFormat.SupportedFileExtensions[0];
+                    var suggestedFileName = SelectedFormat.GetSuggestedFileName(SelectedSong);
+                    var filePath = await _dialogService.SaveFileAsync(window, "Export Song", fileType, suggestedFileName, SelectedFormat.Name, $"*{fileType}");
+                    if (filePath == null) return;
+
+                    await SelectedFormat.ExportToFileAsync(SelectedSong, SongSections.SongOrder, filePath);
+                    await _dialogService.ShowInfoAsync("Exported", $"Song has been exported to {filePath}", window);
+                }
+                else
+                {
+                    await _dialogService.ShowInfoAsync("Export", "Please select a song to export.", window);
+                }
+            }
+            catch (Exception ex)
+            {
+                await _dialogService.ShowErrorAsync("Error", $"Failed to export: {ex.Message}", window);
             }
         }
 
@@ -378,6 +444,20 @@ namespace GetHymnLyricsv2.ViewModels
             else
             {
                 SongSections.Clear();
+            }
+        }
+
+        private void BuildFormatMenu()
+        {
+            foreach (var format in PreviewFormats)
+            {
+                var menuItem = new MenuItem
+                {
+                    Header = format.Name,
+                    Command = new RelayCommand<IPreviewFormat>(OnFormatSelected, f => f == format),
+                    CommandParameter = format
+                };
+                FormatMenuItems.Add(menuItem);
             }
         }
     }

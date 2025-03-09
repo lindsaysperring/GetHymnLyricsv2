@@ -10,6 +10,7 @@ namespace GetHymnLyricsv2.Models
         private SectionSymbolLocation _lastSectionSymbolLocation = SectionSymbolLocation.None;
         private DateTime _lastUpdateCheck = DateTime.MinValue;
         private int _updateCheckFrequencyHours = 24;
+        private string _lastPreviewFormat = "ProPresenter"; // Default format
 
         public string LastSectionSymbol
         {
@@ -33,6 +34,12 @@ namespace GetHymnLyricsv2.Models
         {
             get => _updateCheckFrequencyHours;
             set => SetProperty(ref _updateCheckFrequencyHours, value);
+        }
+
+        public string LastPreviewFormat
+        {
+            get => _lastPreviewFormat;
+            set => SetProperty(ref _lastPreviewFormat, value);
         }
 
         [JsonConstructor]

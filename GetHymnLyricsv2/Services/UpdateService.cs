@@ -1,8 +1,6 @@
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using GetHymnLyricsv2.Models;
 using Octokit;
 
 namespace GetHymnLyricsv2.Services

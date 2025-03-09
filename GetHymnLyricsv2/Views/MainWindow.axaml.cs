@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using GetHymnLyricsv2.ViewModels;
 
 namespace GetHymnLyricsv2.Views
