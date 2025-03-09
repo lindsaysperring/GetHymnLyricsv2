@@ -18,7 +18,6 @@ namespace GetHymnLyricsv2.Models.PreviewFormats
         public override string Description => "Export to FreeShow format";
         public override bool SupportsExport => true;
         public override string[] SupportedFileExtensions => new[] { ".show" };
-        private const int linesPerSlide = 2;
 
         public FreeShowFormat(ISettingsService settingsService) : base(settingsService)
         {
@@ -135,13 +134,13 @@ namespace GetHymnLyricsv2.Models.PreviewFormats
 
                 };
 
-                for (int i = 0; i < lines.Length; i += linesPerSlide)
+                for (int i = 0; i < lines.Length; i += _settingsService.Settings.LinesPerSlide)
                 {
                     var slideItem = new SlideItem
                     {
                         Lines = new List<Line>()
                     };
-                    for (int j = 0; j < linesPerSlide && i + j < lines.Length; j++)
+                    for (int j = 0; j < _settingsService.Settings.LinesPerSlide && i + j < lines.Length; j++)
                     {
                         slideItem.Lines.Add(new Line
                         {
@@ -200,9 +199,11 @@ namespace GetHymnLyricsv2.Models.PreviewFormats
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
-            var output = new List<object>();
-            output.Add(showRoot.Id);
-            output.Add(showRoot.Show);
+            var output = new List<object>
+            {
+                showRoot.Id,
+                showRoot.Show
+            };
 
             return JsonSerializer.Serialize(output, options);
         }

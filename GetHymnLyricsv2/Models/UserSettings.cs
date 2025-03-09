@@ -8,6 +8,7 @@ namespace GetHymnLyricsv2.Models
     {
         private string _lastSectionSymbol = "Ω";
         private SectionSymbolLocation _lastSectionSymbolLocation = SectionSymbolLocation.None;
+        private int _linesPerSlide = 2;
         private DateTime _lastUpdateCheck = DateTime.MinValue;
         private int _updateCheckFrequencyHours = 24;
         private string _lastPreviewFormat = "ProPresenter"; // Default format
@@ -22,6 +23,12 @@ namespace GetHymnLyricsv2.Models
         {
             get => _lastSectionSymbolLocation;
             set => SetProperty(ref _lastSectionSymbolLocation, value);
+        }
+
+        public int LinesPerSlide
+        {
+            get => _linesPerSlide;
+            set => SetProperty(ref _linesPerSlide, value);
         }
 
         public DateTime LastUpdateCheck

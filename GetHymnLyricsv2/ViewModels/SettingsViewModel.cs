@@ -19,6 +19,9 @@ namespace GetHymnLyricsv2.ViewModels
         [ObservableProperty]
         private SectionSymbolLocation _lastSectionSymbolLocation;
 
+        [ObservableProperty]
+        private int _linesPerSlide;
+
         public IEnumerable<SectionSymbolLocation> SymbolLocations => 
             Enum.GetValues(typeof(SectionSymbolLocation))
                 .Cast<SectionSymbolLocation>();
@@ -33,6 +36,7 @@ namespace GetHymnLyricsv2.ViewModels
         {
             LastSectionSymbol = _settingsService.Settings.LastSectionSymbol;
             LastSectionSymbolLocation = _settingsService.Settings.LastSectionSymbolLocation;
+            LinesPerSlide = _settingsService.Settings.LinesPerSlide;
         }
 
         [RelayCommand]
@@ -40,6 +44,7 @@ namespace GetHymnLyricsv2.ViewModels
         {
             _settingsService.Settings.LastSectionSymbol = LastSectionSymbol;
             _settingsService.Settings.LastSectionSymbolLocation = LastSectionSymbolLocation;
+            _settingsService.Settings.LinesPerSlide = LinesPerSlide;
             _settingsService.SaveSettings();
             window.Close();
         }
