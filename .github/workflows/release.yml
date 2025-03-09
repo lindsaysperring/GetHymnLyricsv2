@@ -40,7 +40,6 @@ jobs:
       - name: Publish (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          cd GetHymnLyricsv2
           dotnet publish -c Release -r ${{ matrix.publish_rid }} `
           --self-contained true `
           -p:PublishSingleFile=true `
@@ -50,7 +49,6 @@ jobs:
       - name: Publish (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          cd GetHymnLyricsv2
           dotnet publish -c Release -r ${{ matrix.publish_rid }} \
           --self-contained true \
           -p:UseAppHost=true
@@ -61,13 +59,11 @@ jobs:
       - name: Copy files (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          powershell Compress-Archive -Path "bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
+          powershell Compress-Archive -Path "GetHymnLyricsv2\bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
 
       - name: Create App Bundle (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          echo "Current directory: $(pwd)"
-          ls
           APP_NAME="GetHymnLyricsv2.app"
           echo "app_name=$APP_NAME" >> "$GITHUB_ENV"
           APP_CONTENTS="release-package/$APP_NAME/Contents"
@@ -77,8 +73,8 @@ jobs:
           mkdir -p "$APP_CONTENTS/Resources"
           
           # Copy executable and make it executable
-          chmod +x "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
-          cp -r "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/" "$APP_CONTENTS/MacOS/"
+          chmod +x "GetHymnLyricsv2/bin/Release/net8.0/${{ matrix.publish_rid }}/publish/${{ matrix.output_name }}"
+          cp -r "GetHymnLyricsv2/bin/Release/net8.0/${{ matrix.publish_rid }}/publish/" "$APP_CONTENTS/MacOS/"
           
           # Copy data files
           mkdir -p "$APP_CONTENTS/Resources/Data"
