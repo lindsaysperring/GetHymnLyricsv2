@@ -78,7 +78,7 @@ jobs:
           
           # Copy data files
           mkdir -p "$APP_CONTENTS/Resources/Data"
-          cp "Data/Songs.xml" "$APP_CONTENTS/Resources/Data/"
+          cp "GetHymnLyricsv2/Data/Songs.xml" "$APP_CONTENTS/Resources/Data/"
           
           # Copy icon if it exists
           cp "Assets/gethymnlyrics-logo.ico" "$APP_CONTENTS/Resources/gethymnlyrics.icns" || true
