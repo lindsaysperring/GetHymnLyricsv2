@@ -55,6 +55,31 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
+
+                <!-- Export/Copy Settings -->
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="8"
+                    Padding="16"
+                    Margin="0,0,0,16">
+                    <StackPanel Spacing="16">
+                    <TextBlock Text="Export/Copy Settings"
+                         FontSize="18"
+                         FontWeight="SemiBold"/>
+
+                    <!-- Lines Per Slide -->
+                    <StackPanel>
+                        <TextBlock Text="Lines Per Slide"
+                             Margin="0,0,0,8"/>
+                        <NumericUpDown Value="{Binding LinesPerSlide}"
+                             Minimum="1"
+                             Maximum="20"
+                             Width="150"
+                             HorizontalAlignment="Left"
+							 FormatString="0"
+                             Increment="1"/>
+                    </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 

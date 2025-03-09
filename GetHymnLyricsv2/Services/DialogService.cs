@@ -173,7 +173,7 @@ namespace GetHymnLyricsv2.Services
             return result.Count > 0 ? result[0].Path.LocalPath : null;
         }
 
-        public async Task<string?> SaveFileAsync(Window parent, string title, string defaultExtension, params string[] extensions)
+        public async Task<string?> SaveFileAsync(Window parent, string title, string defaultExtension, string? suggestedFileName = null, string? fileTypeName = null, params string[] extensions)
         {
             var options = new FilePickerSaveOptions
             {
@@ -181,12 +181,17 @@ namespace GetHymnLyricsv2.Services
                 DefaultExtension = defaultExtension,
                 FileTypeChoices = new[]
                 {
-                    new FilePickerFileType(title)
+                    new FilePickerFileType(fileTypeName ?? title)
                     {
                         Patterns = extensions
                     }
                 }
             };
+
+            if (suggestedFileName != null)
+            {
+                options.SuggestedFileName = suggestedFileName;
+            }
 
             var result = await parent.StorageProvider.SaveFilePickerAsync(options);
             return result?.Path.LocalPath;

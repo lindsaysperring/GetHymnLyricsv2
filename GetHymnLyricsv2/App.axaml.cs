@@ -9,6 +9,8 @@ using GetHymnLyricsv2.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System;
+using GetHymnLyricsv2.Models.PreviewFormats.Interfaces;
+using GetHymnLyricsv2.Models.PreviewFormats;
 
 namespace GetHymnLyricsv2
 {
@@ -30,6 +32,11 @@ namespace GetHymnLyricsv2
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<ISettingsService, SettingsService>();
             services.AddSingleton<IUpdateService, UpdateService>();
+
+            // Register preview formats
+            services.AddSingleton<IPreviewFormat, PlainTextFormat>();
+            services.AddSingleton<IPreviewFormat, ProPresenterFormat>();
+            services.AddSingleton<IPreviewFormat, FreeShowFormat>();
 
             // Register view models
             services.AddTransient<SongDetailsViewModel>();

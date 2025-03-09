@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using GetHymnLyricsv2.Models;
 
 namespace GetHymnLyricsv2.Services
