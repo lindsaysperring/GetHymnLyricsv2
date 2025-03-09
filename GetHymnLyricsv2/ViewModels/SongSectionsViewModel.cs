@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
 using GetHymnLyricsv2.Services;
 using Avalonia.Controls.Documents;
+using Avalonia.Threading;
 
 namespace GetHymnLyricsv2.ViewModels
 {
@@ -110,7 +111,8 @@ namespace GetHymnLyricsv2.ViewModels
         [ObservableProperty]
         private ObservableCollection<MainWindowViewModel.OrderItem> songOrder = new();
 
-        public InlineCollection FormattedInlineText => FormatSongTextCollection();
+        [ObservableProperty]
+        private InlineCollection formattedInlineText = new InlineCollection();
 
         public SongSectionsViewModel(ISongService songService, ISettingsService settingsService)
         {
@@ -127,7 +129,7 @@ namespace GetHymnLyricsv2.ViewModels
             UpdateSections();
             UpdateOrder();
 
-            OnPropertyChanged(nameof(FormattedInlineText));
+            FormattedInlineText = FormatSongTextCollection();
         }
 
         private void UpdateSections()
@@ -384,10 +386,12 @@ namespace GetHymnLyricsv2.ViewModels
             return inlineCollection;
         }
 
-
         private void OnSettingsChanged(object? sender, EventArgs e)
         {
-            OnPropertyChanged(nameof(FormattedInlineText));
+            Dispatcher.UIThread.Post(() =>
+            {
+                FormattedInlineText = FormatSongTextCollection();
+            }, DispatcherPriority.Background);
         }
 
         public void OnSectionChanged()
