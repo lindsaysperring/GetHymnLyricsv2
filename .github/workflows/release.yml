@@ -67,7 +67,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           echo "Current directory: $(pwd)"
-          ls "bin/Release/net8.0/${{ matrix.publish_rid }}/publish/"
+          ls
           APP_NAME="GetHymnLyricsv2.app"
           echo "app_name=$APP_NAME" >> "$GITHUB_ENV"
           APP_CONTENTS="release-package/$APP_NAME/Contents"
