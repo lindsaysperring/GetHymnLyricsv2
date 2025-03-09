@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build-and-release:
@@ -64,6 +66,7 @@ jobs:
       - name: Create App Bundle (macOS)
         if: matrix.os == 'macos-latest'
         run: |
+          echo "Current directory: $(pwd)"
           APP_NAME="GetHymnLyricsv2.app"
           echo "app_name=$APP_NAME" >> "$GITHUB_ENV"
           APP_CONTENTS="release-package/$APP_NAME/Contents"
