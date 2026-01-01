@@ -26,6 +26,8 @@ namespace GetHymnLyricsv2.ViewModels
             Enum.GetValues(typeof(SectionSymbolLocation))
                 .Cast<SectionSymbolLocation>();
 
+        public event EventHandler? RequestClose;
+
         public SettingsViewModel(ISettingsService settingsService)
         {
             _settingsService = settingsService;
@@ -40,20 +42,20 @@ namespace GetHymnLyricsv2.ViewModels
         }
 
         [RelayCommand]
-        private void Save(Window window)
+        private void Save()
         {
             _settingsService.Settings.LastSectionSymbol = LastSectionSymbol;
             _settingsService.Settings.LastSectionSymbolLocation = LastSectionSymbolLocation;
             _settingsService.Settings.LinesPerSlide = LinesPerSlide;
             _settingsService.SaveSettings();
-            window.Close();
+            RequestClose?.Invoke(this, EventArgs.Empty);
         }
 
         [RelayCommand]
-        private void Cancel(Window window)
+        private void Cancel()
         {
             LoadSettings();
-            window.Close();
+            RequestClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }

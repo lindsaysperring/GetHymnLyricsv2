@@ -2,6 +2,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using GetHymnLyricsv2.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GetHymnLyricsv2
 {
@@ -18,6 +19,13 @@ namespace GetHymnLyricsv2
 
             if (type != null)
             {
+                // Try to resolve from DI first
+                var control = App.Current?.Services?.GetService(type) as Control;
+                if (control != null)
+                {
+                    return control;
+                }
+
                 return (Control)Activator.CreateInstance(type)!;
             }
 

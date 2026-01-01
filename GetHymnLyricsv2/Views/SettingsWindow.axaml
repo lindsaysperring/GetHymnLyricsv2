@@ -89,11 +89,9 @@
                   HorizontalAlignment="Right" 
                   Margin="20">
             <Button Command="{Binding CancelCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     Content="Cancel"
                     Margin="0,0,10,0"/>
             <Button Command="{Binding SaveCommand}"
-                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     Content="Save"
                     Margin="0,0,10,0"/>
         </StackPanel>

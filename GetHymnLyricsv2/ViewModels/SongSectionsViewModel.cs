@@ -124,11 +124,32 @@ namespace GetHymnLyricsv2.ViewModels
 
         public void Initialize(DataPacket dataPacket, Song song)
         {
+            if (_currentSong != null)
+            {
+                _currentSong.PropertyChanged -= OnSongPropertyChanged;
+            }
+
             _dataPacket = dataPacket;
             _currentSong = song;
+
+            if (_currentSong != null)
+            {
+                _currentSong.PropertyChanged += OnSongPropertyChanged;
+            }
+
             UpdateSections();
             UpdateOrder();
 
+            UpdateFormattedText();
+        }
+
+        private void OnSongPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            UpdateFormattedText();
+        }
+
+        private void UpdateFormattedText()
+        {
             FormattedInlineText = FormatSongTextCollection();
         }
 
@@ -165,6 +186,7 @@ namespace GetHymnLyricsv2.ViewModels
                     });
                 }
             }
+            UpdateFormattedText();
         }
 
         [RelayCommand]
@@ -257,6 +279,7 @@ namespace GetHymnLyricsv2.ViewModels
                 SwapSectionIds(section.Section, previousSection.Section);
                 Sections.Move(index, index - 1);
                 UpdateAllSectionNames();
+                UpdateFormattedText();
                 ContentChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -271,6 +294,7 @@ namespace GetHymnLyricsv2.ViewModels
                 SwapSectionIds(section.Section, nextSection.Section);
                 Sections.Move(index, index + 1);
                 UpdateAllSectionNames();
+                UpdateFormattedText();
                 ContentChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -396,11 +420,16 @@ namespace GetHymnLyricsv2.ViewModels
 
         public void OnSectionChanged()
         {
+            UpdateFormattedText();
             ContentChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public void Clear()
         {
+            if (_currentSong != null)
+            {
+                _currentSong.PropertyChanged -= OnSongPropertyChanged;
+            }
             Sections.Clear();
             SongOrder.Clear();
             SelectedSection = null;
@@ -410,6 +439,10 @@ namespace GetHymnLyricsv2.ViewModels
 
         public void Dispose()
         {
+            if (_currentSong != null)
+            {
+                _currentSong.PropertyChanged -= OnSongPropertyChanged;
+            }
             _settingsService.Settings.PropertyChanged -= OnSettingsChanged;
         }
     }

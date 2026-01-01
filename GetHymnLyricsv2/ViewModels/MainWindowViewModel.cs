@@ -4,7 +4,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GetHymnLyricsv2.Models;
@@ -120,53 +122,44 @@ namespace GetHymnLyricsv2.ViewModels
             SongDetails.ContentChanged += (s, e) => HasUnsavedChanges = true;
             SongSections.ContentChanged += (s, e) => HasUnsavedChanges = true;
 
-            #if DEBUG
-                LoadSampleData();
-            #else
-                LoadData();
-            #endif
-
-            _ = CheckForUpdates(null);
-
             BuildFormatMenu();
         }
 
-        private async void LoadSampleData()
+        public async Task InitializeAsync()
         {
-            var samplePath = Path.Combine("Data", "sample.xml");
-            if (File.Exists(samplePath))
-            {
-                await LoadFileAsync(samplePath);
-            }
-        }
+            #if DEBUG
+                var samplePath = Path.Combine("Data", "sample.xml");
+                if (File.Exists(samplePath))
+                {
+                    await LoadFileAsync(samplePath);
+                }
+            #else
+                string filePath = OperatingSystem.IsMacOS()
+                    ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "com.lindsaysperring.gethymnlyricsv2", "Data", SongsFileName)
+                    : Path.Combine(AppContext.BaseDirectory, "Data", SongsFileName);
+                
+                if (File.Exists(filePath))
+                {
+                    await LoadFileAsync(filePath);
+                }
+                else if (OperatingSystem.IsMacOS())
+                {
+                    string appFolder = Path.GetDirectoryName(filePath)!;
+                    Directory.CreateDirectory(appFolder);
+                    File.Copy(Path.Combine(AppContext.BaseDirectory, "Data", SongsFileName), filePath);
+                    await LoadFileAsync(filePath);
+                }
+            #endif
 
-        private async void LoadData()
-        {
-            string filePath = OperatingSystem.IsMacOS()
-                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "com.lindsaysperring.gethymnlyricsv2", "Data", SongsFileName)
-                : Path.Combine(AppContext.BaseDirectory, "Data", SongsFileName);
-            
-            if (File.Exists(filePath))
-            {
-                await LoadFileAsync(filePath);
-                return;
-            }
-            
-            if (OperatingSystem.IsMacOS())
-            {
-                string appFolder = Path.GetDirectoryName(filePath)!;
-                Directory.CreateDirectory(appFolder);
-                File.Copy(Path.Combine(AppContext.BaseDirectory, "Data", SongsFileName), filePath);
-                await LoadFileAsync(filePath);
-            }
+            await CheckForUpdatesInternal(false);
         }
 
         [RelayCommand]
-        private async Task OpenFile(Window window)
+        private async Task OpenFile()
         {
             try
             {
-                var filePath = await _dialogService.OpenFileAsync(window, "Open Hymn File", "*.xml");
+                var filePath = await _dialogService.OpenFileAsync("Open Hymn File", "*.xml");
                 if (filePath != null)
                 {
                     await LoadFileAsync(filePath);
@@ -174,12 +167,12 @@ namespace GetHymnLyricsv2.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowErrorAsync("Error", $"Failed to open file: {ex.Message}", window);
+                await _dialogService.ShowErrorAsync("Error", $"Failed to open file: {ex.Message}");
             }
         }
 
         [RelayCommand]
-        private async Task SaveFile(Window window)
+        private async Task SaveFile()
         {
             if (DataPacket == null) return;
 
@@ -187,17 +180,17 @@ namespace GetHymnLyricsv2.ViewModels
             {
                 if (string.IsNullOrEmpty(_currentFilePath))
                 {
-                    _currentFilePath = await _dialogService.SaveFileAsync(window, "Save Hymn File", ".xml", "*.xml");
+                    _currentFilePath = await _dialogService.SaveFileAsync("Save Hymn File", ".xml", "*.xml");
                     if (_currentFilePath == null) return;
                 }
 
                 await _fileService.SaveFileAsync(_currentFilePath, DataPacket);
                 HasUnsavedChanges = false;
-                await _dialogService.ShowInfoAsync("Saved", "File has been saved.", window);
+                await _dialogService.ShowInfoAsync("Saved", "File has been saved.");
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowErrorAsync("Error", $"Failed to save file: {ex.Message}", window);
+                await _dialogService.ShowErrorAsync("Error", $"Failed to save file: {ex.Message}");
             }
         }
 
@@ -242,27 +235,26 @@ namespace GetHymnLyricsv2.ViewModels
         }
 
         [RelayCommand]
-        private async Task CopyToClipboard(Window window)
+        private async Task CopyToClipboard()
         {
             if (SongSections == null || SelectedFormat == null || !SelectedFormat.SupportsCopy) return;
 
             try
             {
-                var clipboard = window.Clipboard;
-                if (clipboard != null && SelectedSong != null)
+                if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow?.Clipboard is { } clipboard && SelectedSong != null)
                 {
                     await clipboard.SetTextAsync(SelectedFormat.FormatForCopy(SelectedSong, SongSections.SongOrder));
-                    await _dialogService.ShowInfoAsync("Copied", $"Text has been copied to clipboard in {SelectedFormat.Name} format.", window);
+                    await _dialogService.ShowInfoAsync("Copied", $"Text has been copied to clipboard in {SelectedFormat.Name} format.");
                 }
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowErrorAsync("Error", $"Failed to copy to clipboard: {ex.Message}", window);
+                await _dialogService.ShowErrorAsync("Error", $"Failed to copy to clipboard: {ex.Message}");
             }
         }
 
         [RelayCommand]
-        private async Task ExportToFile(Window window)
+        private async Task ExportToFile()
         {
             if (SongSections == null || SelectedFormat == null || !SelectedFormat.SupportsExport) return;
 
@@ -272,20 +264,20 @@ namespace GetHymnLyricsv2.ViewModels
                 {
                     var fileType = SelectedFormat.SupportedFileExtensions[0];
                     var suggestedFileName = SelectedFormat.GetSuggestedFileName(SelectedSong);
-                    var filePath = await _dialogService.SaveFileAsync(window, "Export Song", fileType, suggestedFileName, SelectedFormat.Name, $"*{fileType}");
+                    var filePath = await _dialogService.SaveFileAsync("Export Song", fileType, suggestedFileName, SelectedFormat.Name, $"*{fileType}");
                     if (filePath == null) return;
 
                     await SelectedFormat.ExportToFileAsync(SelectedSong, SongSections.SongOrder, filePath);
-                    await _dialogService.ShowInfoAsync("Exported", $"Song has been exported to {filePath}", window);
+                    await _dialogService.ShowInfoAsync("Exported", $"Song has been exported to {filePath}");
                 }
                 else
                 {
-                    await _dialogService.ShowInfoAsync("Export", "Please select a song to export.", window);
+                    await _dialogService.ShowInfoAsync("Export", "Please select a song to export.");
                 }
             }
             catch (Exception ex)
             {
-                await _dialogService.ShowErrorAsync("Error", $"Failed to export: {ex.Message}", window);
+                await _dialogService.ShowErrorAsync("Error", $"Failed to export: {ex.Message}");
             }
         }
 
@@ -312,48 +304,49 @@ namespace GetHymnLyricsv2.ViewModels
             }
         }
 
-        public async Task<bool> ConfirmCloseWithUnsavedChanges(Window window)
+        public async Task<bool> ConfirmCloseWithUnsavedChanges()
         {
             return await _dialogService.ShowConfirmationAsync(
                 "Unsaved Changes",
-                "You have unsaved changes. Do you want to close without saving?",
-                window
+                "You have unsaved changes. Do you want to close without saving?"
             );
         }
 
         [RelayCommand]
-        private async Task OpenSettings(Window window)
+        private async Task OpenSettings()
         {
             var settingsWindow = new SettingsWindow
             {
                 DataContext = new SettingsViewModel(_settingsService)
             };
 
-            await settingsWindow.ShowDialog(window);
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            {
+                await settingsWindow.ShowDialog(desktop.MainWindow);
+            }
         }
 
         [RelayCommand]
-        private async Task CheckForUpdates(Window? window)
+        private Task CheckForUpdates()
+        {
+            return CheckForUpdatesInternal(true);
+        }
+
+        private async Task CheckForUpdatesInternal(bool isUserInitiated)
         {
             try
             {
-                var force = window != null; // user clicked the button
-
-                if (!force && !await _updateService.ShouldCheckForUpdates())
+                if (!isUserInitiated && !await _updateService.ShouldCheckForUpdates())
                 {
-                    if (window != null)
-                    {
-                        await _dialogService.ShowInfoAsync("Update Check", "Already checked for updates recently.", window);
-                    }
                     return;
                 }
 
                 var updateInfo = await _updateService.CheckForUpdatesAsync();
                 if (updateInfo == null)
                 {
-                    if (window != null)
+                    if (isUserInitiated)
                     {
-                        await _dialogService.ShowInfoAsync("Update Check", "Failed to check for updates.", window);
+                        await _dialogService.ShowInfoAsync("Update Check", "Failed to check for updates.");
                     }
                     return;
                 }
@@ -365,44 +358,45 @@ namespace GetHymnLyricsv2.ViewModels
                     UpdateVersion = updateInfo.Version;
                     UpdateAvailable = true;
 
-                    if (window != null)
+                    if (isUserInitiated)
                     {
                         var result = await _dialogService.ShowConfirmationAsync(
                             "Update Available",
-                            $"Version {updateInfo.Version} is available. Would you like to view the release notes?",
-                            window);
+                            $"Version {updateInfo.Version} is available. Would you like to view the release notes?");
 
                         if (result)
                         {
-                            await OpenUpdateInfo(window);
+                            await OpenUpdateInfo();
                         }
                     }
                 }
-                else if (window != null)
+                else
                 {
-                    await _dialogService.ShowInfoAsync("Update Check", "You are using the latest version.", window);
+                    if (isUserInitiated)
+                    {
+                        await _dialogService.ShowInfoAsync("Update Check", "You are using the latest version.");
+                    }
                 }
 
                 await _updateService.UpdateLastCheckTime();
             }
             catch (Exception ex)
             {
-                if (window != null)
+                if (isUserInitiated)
                 {
-                    await _dialogService.ShowErrorAsync("Error", $"Failed to check for updates: {ex.Message}", window);
+                    await _dialogService.ShowErrorAsync("Error", $"Failed to check for updates: {ex.Message}");
                 }
             }
         }
 
         [RelayCommand]
-        private async Task OpenUpdateInfo(Window window)
+        private async Task OpenUpdateInfo()
         {
             if (_updateInfo != null)
             {
                 var result = await _dialogService.ShowConfirmationAsync(
                     $"Update {_updateInfo.Version}",
-                    $"Release Notes:\n{_updateInfo.ReleaseNotes}\n\nWould you like to download the update?",
-                    window);
+                    $"Release Notes:\n{_updateInfo.ReleaseNotes}\n\nWould you like to download the update?");
 
                 if (result)
                 {
@@ -427,7 +421,7 @@ namespace GetHymnLyricsv2.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        await _dialogService.ShowErrorAsync("Error", $"Failed to open download URL: {ex.Message}", window);
+                        await _dialogService.ShowErrorAsync("Error", $"Failed to open download URL: {ex.Message}");
                     }
                 }
             }

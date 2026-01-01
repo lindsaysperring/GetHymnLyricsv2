@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -19,9 +20,18 @@ namespace GetHymnLyricsv2.Services
 
     public class DialogService : IDialogService
     {
-
-        private async Task<object> ShowDialogAsync(string title, string message, DialogType type, Window parent)
+        private Window GetMainWindow()
         {
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                return desktop.MainWindow ?? throw new InvalidOperationException("Main window is not set.");
+            }
+            throw new InvalidOperationException("Application lifetime is not IClassicDesktopStyleApplicationLifetime.");
+        }
+
+        private async Task<object> ShowDialogAsync(string title, string message, DialogType type)
+        {
+            var parent = GetMainWindow();
             var icon = type switch
             {
                 DialogType.Error => "❌",
@@ -71,17 +81,18 @@ namespace GetHymnLyricsv2.Services
             return await tcs.Task;
         }
 
-        public Task ShowErrorAsync(string title, string message, Window parent)
-            => ShowDialogAsync(title, message, DialogType.Error, parent);
+        public Task ShowErrorAsync(string title, string message)
+            => ShowDialogAsync(title, message, DialogType.Error);
 
-        public Task ShowWarningAsync(string title, string message, Window parent)
-            => ShowDialogAsync(title, message, DialogType.Warning, parent);
+        public Task ShowWarningAsync(string title, string message)
+            => ShowDialogAsync(title, message, DialogType.Warning);
 
-        public Task ShowInfoAsync(string title, string message, Window parent)
-            => ShowDialogAsync(title, message, DialogType.Info, parent);
+        public Task ShowInfoAsync(string title, string message)
+            => ShowDialogAsync(title, message, DialogType.Info);
 
-        public async Task<bool> ShowConfirmationAsync(string title, string message, Window parent)
+        public async Task<bool> ShowConfirmationAsync(string title, string message)
         {
+            var parent = GetMainWindow();
             var iconBitmap = new Bitmap(AssetLoader.Open(new Uri($"avares://{nameof(GetHymnLyricsv2)}/Assets/gethymnlyrics-logo.ico")));
             var tcs = new TaskCompletionSource<bool>();
 
@@ -154,8 +165,9 @@ namespace GetHymnLyricsv2.Services
             return await tcs.Task;
         }
 
-        public async Task<string?> OpenFileAsync(Window parent, string title, params string[] extensions)
+        public async Task<string?> OpenFileAsync(string title, params string[] extensions)
         {
+            var parent = GetMainWindow();
             var options = new FilePickerOpenOptions
             {
                 Title = title,
@@ -173,8 +185,9 @@ namespace GetHymnLyricsv2.Services
             return result.Count > 0 ? result[0].Path.LocalPath : null;
         }
 
-        public async Task<string?> SaveFileAsync(Window parent, string title, string defaultExtension, string? suggestedFileName = null, string? fileTypeName = null, params string[] extensions)
+        public async Task<string?> SaveFileAsync(string title, string defaultExtension, string? suggestedFileName = null, string? fileTypeName = null, params string[] extensions)
         {
+            var parent = GetMainWindow();
             var options = new FilePickerSaveOptions
             {
                 Title = title,

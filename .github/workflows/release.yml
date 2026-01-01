@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   build-and-release:
@@ -13,24 +14,37 @@ jobs:
         include:
           - os: windows-latest
             output_name: GetHymnLyricsv2.exe
-            artifact_name: GetHymnLyricsv2-Windows-x64
+            platform_name: Windows-x64
             publish_rid: win-x64
           - os: windows-latest
             output_name: GetHymnLyricsv2.exe
-            artifact_name: GetHymnLyricsv2-Windows-x86
+            platform_name: Windows-x86
             publish_rid: win-x86
           - os: macos-latest
             output_name: GetHymnLyricsv2
-            artifact_name: GetHymnLyricsv2-macOS
+            platform_name: macOS-x64
             publish_rid: osx-x64
 
     steps:
       - uses: actions/checkout@v4
-      
+        with:
+          fetch-depth: 0 # Required for Nerdbank.GitVersioning to calculate version
+
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+
+      - name: Install NBGV tool
+        run: dotnet tool install -g nbgv
+
+      - name: Set Version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(nbgv get-version -v SimpleVersion)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Detected version: $VERSION"
 
       - name: Restore dependencies
         run: dotnet restore
@@ -55,16 +69,16 @@ jobs:
       - name: Create output directory
         run: mkdir release-package
 
-      - name: Copy files (Windows)
+      - name: Package (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          powershell Compress-Archive -Path "GetHymnLyricsv2\bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\${{ matrix.artifact_name }}.zip"
+          $ZipName = "GetHymnLyricsv2-${{ matrix.platform_name }}-${{ env.VERSION }}.zip"
+          Compress-Archive -Path "GetHymnLyricsv2\bin\Release\net8.0\${{ matrix.publish_rid }}\publish\*" -DestinationPath "release-package\$ZipName"
 
-      - name: Create App Bundle (macOS)
+      - name: Package (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           APP_NAME="GetHymnLyricsv2.app"
-          echo "app_name=$APP_NAME" >> "$GITHUB_ENV"
           APP_CONTENTS="release-package/$APP_NAME/Contents"
           
           # Create app bundle structure
@@ -82,7 +96,7 @@ jobs:
           # Copy icon if it exists
           cp "Assets/gethymnlyrics-logo.ico" "$APP_CONTENTS/Resources/gethymnlyrics.icns" || true
           
-          # Create Info.plist
+          # Create Info.plist with dynamic version
           cat > "$APP_CONTENTS/Info.plist" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -99,9 +113,9 @@ jobs:
               <key>CFBundleIconFile</key>
               <string>gethymnlyrics.icns</string>
               <key>CFBundleShortVersionString</key>
-              <string>1.0</string>
+              <string>${{ env.VERSION }}</string>
               <key>CFBundleVersion</key>
-              <string>1</string>
+              <string>${{ env.VERSION }}</string>
               <key>LSMinimumSystemVersion</key>
               <string>10.12</string>
               <key>CFBundleInfoDictionaryVersion</key>
@@ -114,19 +128,17 @@ jobs:
           </plist>
           EOF
           
-      - name: Create DMG (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          # Create DMG from the .app bundle
-          hdiutil create -volname "GetHymnLyricsv2" -srcfolder "release-package" -ov -format UDZO "GetHymnLyricsv2.dmg"
-          mv "GetHymnLyricsv2.dmg" "release-package/"
-          rm -r "release-package/$app_name"
+          # Create DMG
+          DMG_NAME="GetHymnLyricsv2-${{ matrix.platform_name }}-${{ env.VERSION }}.dmg"
+          hdiutil create -volname "GetHymnLyricsv2" -srcfolder "release-package" -ov -format UDZO "$DMG_NAME"
+          mv "$DMG_NAME" "release-package/"
+          rm -r "release-package/$APP_NAME"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
-          path: release-package/
+          name: artifacts-${{ matrix.platform_name }}
+          path: release-package/*
 
   create-release:
     needs: build-and-release
@@ -136,14 +148,18 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: artifacts-*
+          merge-multiple: true
         
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            GetHymnLyricsv2-Windows-x64/*
-            GetHymnLyricsv2-Windows-x86/*
-            GetHymnLyricsv2-macOS/*
+          files: artifacts/*
           draft: false
           prerelease: false
           generate_release_notes: true

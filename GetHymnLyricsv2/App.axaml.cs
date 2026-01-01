@@ -16,7 +16,12 @@ namespace GetHymnLyricsv2
 {
     public partial class App : Application
     {
-        private ServiceProvider? _serviceProvider;
+        public new static App? Current => Application.Current as App;
+
+        /// <summary>
+        /// Gets the <see cref="IServiceProvider"/> instance to resolve application services.
+        /// </summary>
+        public IServiceProvider? Services { get; private set; }
         
         public static readonly IReadOnlyList<SectionType> SectionTypes = Array.AsReadOnly(Enum.GetValues<SectionType>());
 
@@ -42,8 +47,9 @@ namespace GetHymnLyricsv2
             services.AddTransient<SongDetailsViewModel>();
             services.AddTransient<SongSectionsViewModel>();
             services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<SettingsViewModel>();
 
-            _serviceProvider = services.BuildServiceProvider();
+            Services = services.BuildServiceProvider();
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -54,7 +60,7 @@ namespace GetHymnLyricsv2
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
 
-                var mainViewModel = _serviceProvider?.GetRequiredService<MainWindowViewModel>();
+                var mainViewModel = Services?.GetRequiredService<MainWindowViewModel>();
                 desktop.MainWindow = new MainWindow
                 {
                     DataContext = mainViewModel,

@@ -15,8 +15,7 @@
 		<StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,0,0,10">
 		    <!-- Export button -->
 		    <Button IsVisible="{Binding SelectedFormat.SupportsExport}"
-		        Command="{Binding ExportToFileCommand}"
-		        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+		        Command="{Binding ExportToFileCommand}">
 		        <StackPanel Orientation="Horizontal" Spacing="8">
 		            <PathIcon Data="{StaticResource save_regular}" Width="16" Height="16" />
 		            <TextBlock Text="Export" VerticalAlignment="Center" />
@@ -25,7 +24,6 @@
 		
 		    <!-- Copy with format selection -->
 		    <SplitButton Command="{Binding CopyToClipboardCommand}"
-		                 CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
 		                 Classes="accent"
 		                 ToolTip.Tip="{Binding SelectedFormat.Description}">
 				<SplitButton.Content>
